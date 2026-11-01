@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BolKhata</title>
+<style>
+  :root {
+    --bg: #f4f1ea;
+    --card: #ffffff;
+    --ink: #1f1a14;
+    --muted: #776b5d;
+    --line: #e7dfd2;
+    --brand: #0f766e;
+    --brand-soft: #e0f2ef;
+    --credit: #c2410c;
+    --credit-soft: #fff1e6;
+    --payment: #15803d;
+    --payment-soft: #e9f8ee;
+    --sale: #1d4ed8;
+    --sale-soft: #e8efff;
+    --purchase: #7c3aed;
+    --purchase-soft: #f1ebff;
+    --expense: #57534e;
+    --expense-soft: #efedea;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", "Noto Sans", sans-serif; }
+  button { font: inherit; color: inherit; }
+  .app { max-width: 540px; margin: 0 auto; min-height: 100vh; padding-bottom: 210px; }
+
+  header { padding: 16px 16px 10px; display: flex; align-items: center; gap: 12px; }
+  .logo { width: 44px; height: 44px; border-radius: 13px; background: var(--brand); color: #fff;
+    display: grid; place-items: center; font-weight: 800; font-size: 20px; flex: none; }
+  .title { flex: 1; min-width: 0; }
+  .title h1 { margin: 0; font-size: 20px; letter-spacing: -0.01em; }
+  .title p { margin: 0; color: var(--muted); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ghost { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 7px 12px;
+    font-size: 13px; font-weight: 600; cursor: pointer; }
+
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 16px 12px; }
+  .tile { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; }
+  .tile .k { font-size: 12px; color: var(--muted); line-height: 1.3; }
+  .tile .v { font-size: 19px; font-weight: 800; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .tile.due .v { color: var(--credit); }
+  .tile.sale .v { color: var(--sale); }
+  .tile.got .v { color: var(--payment); }
+
+  .tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); display: flex; gap: 6px; padding: 6px 16px 10px; }
+  .tab { flex: 1; border: 0; border-radius: 12px; padding: 10px 6px; background: transparent; font-weight: 700;
+    color: var(--muted); cursor: pointer; }
+  .tab.active { background: var(--ink); color: #fff; }
+  .panel { display: none; padding: 0 16px; }
+  .panel.active { display: block; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; margin-bottom: 12px; }
+  .empty { text-align: center; color: var(--muted); padding: 22px 10px; }
+  .empty h2 { color: var(--ink); font-size: 18px; margin: 0 0 6px; }
+  .examples { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+  .example { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 7px 12px;
+    font-size: 14px; cursor: pointer; }
+
+  /* conversation */
+  .turn { margin-bottom: 14px; }
+  .said { margin-left: auto; max-width: 88%; background: var(--brand-soft); border-radius: 16px 16px 4px 16px;
+    padding: 10px 12px; width: fit-content; }
+  .said .meta { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--brand); font-weight: 700; margin-bottom: 2px; }
+  .reply { max-width: 92%; background: var(--card); border: 1px solid var(--line); border-radius: 16px 16px 16px 4px;
+    padding: 10px 12px; margin-top: 8px; }
+  .reply.pending { color: var(--muted); font-style: italic; }
+  .reply .row { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #f1ece3; color: var(--muted); }
+  .badge b { color: var(--ink); }
+  .icon-btn { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 4px 10px;
+    font-size: 13px; cursor: pointer; }
+
+  .entry { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 12px; margin-top: 8px; }
+  .entry .kind { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
+  .entry .who { font-weight: 700; }
+  .entry .items { font-size: 13px; color: var(--muted); }
+  .entry .amt { margin-left: auto; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .entry .grow { min-width: 0; flex: 1; }
+  .entry.undone { opacity: 0.45; }
+  .entry.undone .amt { text-decoration: line-through; }
+  .k-credit { background: var(--credit-soft); } .k-credit .kind, .k-credit .amt { color: var(--credit); }
+  .k-payment { background: var(--payment-soft); } .k-payment .kind, .k-payment .amt { color: var(--payment); }
+  .k-sale { background: var(--sale-soft); } .k-sale .kind, .k-sale .amt { color: var(--sale); }
+  .k-purchase { background: var(--purchase-soft); } .k-purchase .kind, .k-purchase .amt { color: var(--purchase); }
+  .k-expense { background: var(--expense-soft); } .k-expense .kind, .k-expense .amt { color: var(--expense); }
+
+  .reminder { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; padding: 12px; margin-top: 8px; }
+  .reminder .head { font-size: 12px; font-weight: 800; color: var(--payment); text-transform: uppercase; letter-spacing: 0.04em; }
+  .reminder p { margin: 6px 0 10px; }
+  .wa { display: inline-flex; align-items: center; gap: 6px; background: #16a34a; color: #fff; text-decoration: none;
+    font-weight: 700; padding: 8px 14px; border-radius: 999px; font-size: 14px; }
+
+  /* dock */
+  .dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    background: linear-gradient(to top, var(--bg) 78%, rgba(244, 241, 234, 0)); padding: 18px 16px calc(14px + env(safe-area-inset-bottom)); }
+  .dock-inner { max-width: 508px; margin: 0 auto; }
+  .mic { width: 82px; height: 82px; border-radius: 50%; border: 0; display: grid; place-items: center; margin: 0 auto;
+    background: var(--brand); color: #fff; font-size: 34px; cursor: pointer; box-shadow: 0 8px 22px rgba(15, 118, 110, 0.35); }
+  .mic.recording { background: #dc2626; animation: pulse 1.2s ease-in-out infinite; }
+  .mic.busy { background: var(--muted); }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 16px rgba(220, 38, 38, 0.15); } }
+  .hint { text-align: center; font-size: 13px; color: var(--muted); margin: 6px 0 8px; }
+  .typebar { display: flex; gap: 8px; }
+  .typebar input { flex: 1; min-width: 0; font: inherit; padding: 11px 14px; border-radius: 12px; border: 1px solid var(--line); background: #fff; }
+  .send { border: 0; background: var(--ink); color: #fff; border-radius: 12px; padding: 0 16px; font-weight: 700; cursor: pointer; }
+
+  /* khata */
+  .cust { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .cust:last-child { border-bottom: 0; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 800;
+    background: var(--brand-soft); color: var(--brand); flex: none; }
+  .cust .grow { flex: 1; min-width: 0; }
+  .cust .name { font-weight: 700; }
+  .cust select { font: inherit; font-size: 12px; border: 1px solid var(--line); border-radius: 8px; padding: 2px 4px; background: #fff; color: var(--muted); max-width: 140px; }
+  .cust .bal { text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .cust .bal small { display: block; font-size: 11px; font-weight: 600; color: var(--muted); }
+  .bal.due { color: var(--credit); } .bal.clear { color: var(--payment); }
+  .section-title { font-size: 13px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 18px 2px 8px; }
+
+  /* parchi */
+  .scan { border: 2px dashed var(--line); border-radius: var(--radius); padding: 24px; text-align: center; background: var(--card); }
+  .btn { border: 0; border-radius: 14px; padding: 13px 18px; font-weight: 700; cursor: pointer; background: var(--brand); color: #fff; width: 100%; }
+  .btn.secondary { background: var(--brand-soft); color: var(--brand); margin-top: 8px; }
+  .bill { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 15px; }
+  .bill td { padding: 7px 0; border-bottom: 1px solid var(--line); }
+  .bill td:last-child { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .bill tr.total td { border-bottom: 0; font-size: 17px; font-weight: 800; }
+  .thumb { max-width: 100%; max-height: 200px; border-radius: 12px; margin-top: 10px; border: 1px solid var(--line); }
+  .error { color: #b91c1c; background: #fef2f2; border-radius: 12px; padding: 10px 12px; margin-top: 10px; }
+  .hidden { display: none !important; }
+  .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid currentColor; border-top-color: transparent;
+    border-radius: 50%; animation: rot 0.8s linear infinite; vertical-align: -2px; margin-right: 6px; }
+  @keyframes rot { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">बो</div>
+    <div class="title">
+      <h1>BolKhata</h1>
+      <p id="shopName">Bolo, khata likh jaayega · Speak, it's recorded</p>
+    </div>
+    <button class="ghost" id="demoBtn" type="button">Load demo shop</button>
+  </header>
+
+  <div class="tiles">
+    <div class="tile due"><div class="k">Udhaar baaki<br>Total due</div><div class="v" id="tDue">₹0</div></div>
+    <div class="tile sale"><div class="k">Aaj ki bikri<br>Sales today</div><div class="v" id="tSale">₹0</div></div>
+    <div class="tile got"><div class="k">Aaj mila<br>Received today</div><div class="v" id="tGot">₹0</div></div>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="bolo" type="button">🎙 Bolo</button>
+    <button class="tab" data-tab="khata" type="button">📒 Khata</button>
+    <button class="tab" data-tab="parchi" type="button">🧾 Parchi</button>
+  </nav>
+
+  <section class="panel active" id="panel-bolo">
+    <div class="card empty" id="emptyFeed">
+      <h2>Just speak, in any language</h2>
+      Tap the mic and say what happened. BolKhata understands Hindi, Tamil, Bengali, Hinglish and more, and replies in your language.
+      <div class="examples" id="examples"></div>
+    </div>
+    <div id="feed"></div>
+  </section>
+
+  <section class="panel" id="panel-khata">
+    <div class="section-title">Customers · ग्राहक</div>
+    <div class="card" id="customers"></div>
+    <div class="section-title">Bahi · Recent entries</div>
+    <div class="card" id="entries"></div>
+  </section>
+
+  <section class="panel" id="panel-parchi">
+    <div class="scan">
+      <div style="font-size:38px">🧾</div>
+      <p style="margin:6px 0 14px;color:var(--muted)">Photograph a supplier's bill. Even handwritten ones become a purchase entry.</p>
+      <button class="btn" id="parchiPick" type="button">📷 Scan a parchi</button>
+      <button class="btn secondary" id="parchiSample" type="button">Try the sample parchi</button>
+      <input type="file" id="parchiFile" accept="image/*" capture="environment" hidden>
+    </div>
+    <div id="parchiResult"></div>
+  </section>
+</div>
+
+<div class="dock" id="dock">
+  <div class="dock-inner">
+    <button class="mic" id="mic" type="button" aria-label="Speak">🎙</button>
+    <div class="hint" id="hint">Tap to speak · बोलने के लिए दबाएँ</div>
+    <form class="typebar" id="typebar">
+      <input id="typed" placeholder="Or type: Ramesh ko 500 udhaar…" autocomplete="off">
+      <button class="send" type="submit">Send</button>
+    </form>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const NATIVE = {
+  "hi-IN": "हिन्दी", "en-IN": "English", "bn-IN": "বাংলা", "ta-IN": "தமிழ்", "te-IN": "తెలుగు",
+  "mr-IN": "मराठी", "gu-IN": "ગુજરાતી", "kn-IN": "ಕನ್ನಡ", "ml-IN": "മലയാളം", "pa-IN": "ਪੰਜਾਬੀ", "od-IN": "ଓଡ଼ିଆ",
+  "ur-IN": "اردو", "as-IN": "অসমীয়া", "ne-IN": "नेपाली",
+};
+const LANG_NAME = {
+  "hi-IN": "Hindi", "en-IN": "English", "bn-IN": "Bengali", "ta-IN": "Tamil", "te-IN": "Telugu", "mr-IN": "Marathi",
+  "gu-IN": "Gujarati", "kn-IN": "Kannada", "ml-IN": "Malayalam", "pa-IN": "Punjabi", "od-IN": "Odia", "ur-IN": "Urdu",
+};
+const KIND = {
+  credit: "Udhaar diya", payment: "Paise mile", sale: "Bikri", purchase: "Kharida", expense: "Kharcha",
+};
+const EXAMPLES = [
+  "Ramesh ko 500 ka saaman udhaar diya",
+  "Lakshmi ne 300 rupaye wapas diye",
+  "Aaj kitni bikri hui?",
+  "Abdul ko payment reminder bhejo",
+];
+const state = { data: null, languages: [], player: null, queue: [], lastLanguage: "hi-IN" };
+
+// ---------------------------------------------------------------- helpers
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+const rupees = (x) => "₹" + Math.round(x).toLocaleString("en-IN");
+const secs = (ms) => (ms / 1000).toFixed(1) + "s";
+function badge(name, ms) {
+  const b = el("span", "badge", name + " ");
+  b.append(el("b", null, secs(ms)));
+  return b;
+}
+async function api(path, body) {
+  const res = await fetch(path, body === undefined ? {} : {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.detail || "Something went wrong. Please try again.");
+  return data;
+}
+function toBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result.split(",")[1]);
+    r.onerror = reject;
+    r.readAsDataURL(blob);
+  });
+}
+async function shrinkImage(file) {
+  const img = await createImageBitmap(file);
+  const scale = Math.min(1, 1800 / Math.max(img.width, img.height));
+  if (scale === 1 && file.size < 2.5e6) return file;
+  const c = document.createElement("canvas");
+  c.width = Math.round(img.width * scale);
+  c.height = Math.round(img.height * scale);
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+  const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.9));
+  return new File([blob], "parchi.jpg", { type: "image/jpeg" });
+}
+
+// ---------------------------------------------------------------- audio
+function stopAudio() {
+  state.queue.length = 0;
+  if (state.player) { state.player.pause(); state.player = null; }
+}
+function playNext() {
+  const clip = state.queue.shift();
+  if (!clip) { state.player = null; return; }
+  const a = new Audio("data:audio/wav;base64," + clip);
+  state.player = a;
+  a.onended = playNext;
+  a.play().catch(() => (state.player = null));
+}
+// Speak text in a language; returns the clips so they can be replayed.
+async function say(text, language, row) {
+  const { audio, ms } = await api("/api/speak", { text, language });
+  stopAudio();
+  state.queue.push(...audio);
+  playNext();
+  if (row) row.append(badge("🔊 Bulbul", ms));
+  return audio;
+}
+function replayButton(getClips, label = "🔊 Play") {
+  const b = el("button", "icon-btn", label);
+  b.type = "button";
+  b.onclick = async () => {
+    const clips = await getClips();
+    if (!clips) return;
+    stopAudio();
+    state.queue.push(...clips);
+    playNext();
+  };
+  return b;
+}
+
+// ---------------------------------------------------------------- rendering
+function entryRow(e, { undo = true } = {}) {
+  const row = el("div", `entry k-${e.kind}${e.undone ? " undone" : ""}`);
+  const grow = el("div", "grow");
+  grow.append(el("div", "kind", KIND[e.kind] || e.kind));
+  if (e.party) grow.append(el("div", "who", e.party));
+  if (e.items) grow.append(el("div", "items", e.items));
+  row.append(grow, el("div", "amt", rupees(e.amount)));
+  if (e.evidence) {
+    const isPhoto = /\.(png|jpe?g|webp)$/i.test(e.evidence);
+    const b = el("button", "icon-btn", isPhoto ? "🖼" : "▶");
+    b.type = "button";
+    b.title = isPhoto ? "See the original bill" : "Hear the original voice note";
+    b.onclick = () => {
+      if (isPhoto) window.open("/evidence/" + e.evidence, "_blank");
+      else { stopAudio(); state.player = new Audio("/evidence/" + e.evidence); state.player.play(); }
+    };
+    row.append(b);
+  }
+  if (undo) {
+    const u = el("button", "icon-btn", e.undone ? "↺" : "✕");
+    u.type = "button";
+    u.title = e.undone ? "Restore" : "Cancel this entry";
+    u.onclick = async () => render(await api(`/api/entries/${e.id}/toggle`, {}));
+    row.append(u);
+  }
+  return row;
+}
+
+function reminderCard(r) {
+  const card = el("div", "reminder");
+  card.append(el("div", "head", `📨 Reminder for ${r.name} · ${LANG_NAME[r.language] || r.language} · ${rupees(r.balance)}`));
+  card.append(el("p", null, r.text));
+  const row = el("div", "row");
+  row.style.display = "flex"; row.style.gap = "8px"; row.style.flexWrap = "wrap";
+  const wa = el("a", "wa", "Send on WhatsApp");
+  wa.href = r.whatsapp; wa.target = "_blank"; wa.rel = "noopener";
+  let clips = null;
+  row.append(wa, replayButton(async () => clips || (clips = (await api("/api/speak", { text: r.text, language: r.language })).audio), "🔊 Hear message"));
+  card.append(row);
+  return card;
+}
+
+function render(data) {
+  state.data = data;
+  $("shopName").textContent = data.shop + " · Bolo, khata likh jaayega";
+  $("tDue").textContent = rupees(data.outstanding);
+  $("tSale").textContent = rupees(data.today.sale || 0);
+  $("tGot").textContent = rupees(data.today.payment || 0);
+
+  const cust = $("customers");
+  cust.innerHTML = "";
+  if (!data.customers.length) cust.append(el("div", "empty", "No customers yet. Say “Ramesh ko 500 udhaar diya” to add one."));
+  for (const c of data.customers) {
+    const row = el("div", "cust");
+    row.append(el("div", "avatar", c.name.slice(0, 1).toUpperCase()));
+    const grow = el("div", "grow");
+    grow.append(el("div", "name", c.name));
+    const sel = el("select");
+    sel.title = "Language for reminders";
+    for (const l of state.languages) {
+      const o = el("option", null, "📨 " + (NATIVE[l.code] || l.name));
+      o.value = l.code;
+      sel.append(o);
+    }
+    sel.value = c.language;
+    sel.onchange = async () => render(await api(`/api/customers/${c.id}`, { language: sel.value }));
+    grow.append(sel);
+    const bal = el("div", "bal " + (c.balance > 0 ? "due" : "clear"), rupees(Math.abs(c.balance)));
+    bal.append(el("small", null, c.balance > 0 ? "baaki · due" : c.balance < 0 ? "advance" : "clear"));
+    row.append(grow, bal);
+    if (c.balance > 0) {
+      const b = el("button", "icon-btn", "📨");
+      b.type = "button";
+      b.title = "Send a payment reminder";
+      b.onclick = () => remind(c, b);
+      row.append(b);
+    }
+    cust.append(row);
+    if (c._reminder) cust.append(reminderCard(c._reminder));
+  }
+
+  const list = $("entries");
+  list.innerHTML = "";
+  if (!data.entries.length) list.append(el("div", "empty", "No entries yet."));
+  let lastDay = "";
+  for (const e of data.entries) {
+    const day = new Date(e.created_at).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
+    if (day !== lastDay) {
+      const h = el("div", "section-title", day);
+      h.style.margin = lastDay ? "14px 2px 2px" : "0 2px 2px";
+      list.append(h);
+      lastDay = day;
+    }
+    list.append(entryRow(e));
+  }
+}
+
+async function remind(c, btn) {
+  btn.innerHTML = '<span class="spin"></span>';
+  try {
+    const r = await api(`/api/remind/${c.id}`, {});
+    const found = state.data.customers.find((x) => x.id === c.id);
+    if (found) found._reminder = r;
+    render(state.data);
+    say(r.text, r.language);
+  } catch (err) {
+    btn.textContent = "📨";
+    alert(err.message);
+  }
+}
+
+// ---------------------------------------------------------------- commands
+async function runCommand(payload, typedText) {
+  $("emptyFeed").classList.add("hidden");
+  stopAudio();
+  const turn = el("div", "turn");
+  const said = el("div", "said");
+  const meta = el("div", "meta", payload.audio_b64 ? "🎙 Listening…" : "⌨️ Typed");
+  const text = el("div", null, typedText || "…");
+  said.append(meta, text);
+  const reply = el("div", "reply pending");
+  reply.innerHTML = '<span class="spin"></span>Samajh raha hoon…';
+  turn.append(said, reply);
+  $("feed").prepend(turn);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  setBusy(true);
+  try {
+    const d = await api("/api/command", payload);
+    state.lastLanguage = d.language;
+    meta.textContent = `🗣 ${LANG_NAME[d.detected] || d.detected} detected`;
+    text.textContent = d.transcript;
+    reply.className = "reply";
+    reply.textContent = "";
+    reply.append(el("div", null, d.reply));
+    const savedIds = new Set(d.saved);
+    for (const e of d.state.entries.filter((x) => savedIds.has(x.id)).reverse()) reply.append(entryRow(e, { undo: true }));
+    if (d.reminder) reply.append(reminderCard(d.reminder));
+    const row = el("div", "row");
+    if (d.ms.stt != null) row.append(badge("👂 Saaras", d.ms.stt));
+    if (d.ms.lid != null) row.append(badge("🌐 Language ID", d.ms.lid));
+    row.append(badge("🧠 Sarvam-105B", d.ms.llm));
+    let clips = null;
+    row.prepend(replayButton(async () => clips || (clips = (await api("/api/speak", { text: d.reply, language: d.language })).audio)));
+    reply.append(row);
+    render(d.state);
+    clips = await say(d.reply, d.language, row);
+    if (d.reminder) {
+      const r = d.reminder;
+      state.queue.push(...(await api("/api/speak", { text: r.text, language: r.language })).audio);
+      if (!state.player) playNext();
+    }
+  } catch (err) {
+    // If the command itself failed, replace the spinner; if only the voice failed, keep the reply.
+    if (reply.classList.contains("pending")) {
+      reply.className = "reply";
+      reply.textContent = "";
+    }
+    reply.append(el("div", "error", err.message));
+  } finally {
+    setBusy(false);
+  }
+}
+
+function setBusy(busy) {
+  $("mic").classList.toggle("busy", busy);
+  $("hint").textContent = busy ? "Working… · लिख रहा हूँ" : "Tap to speak · बोलने के लिए दबाएँ";
+}
+
+let recorder = null;
+async function toggleMic() {
+  if (recorder) { recorder.stop(); return; }
+  if ($("mic").classList.contains("busy")) return;
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch {
+    $("hint").textContent = "Microphone blocked. Type below instead.";
+    return;
+  }
+  stopAudio();
+  showTab("bolo");
+  const chunks = [];
+  recorder = new MediaRecorder(stream);
+  recorder.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+  recorder.onstop = async () => {
+    stream.getTracks().forEach((t) => t.stop());
+    $("mic").classList.remove("recording");
+    const mime = (recorder.mimeType || "audio/webm").split(";")[0];
+    recorder = null;
+    const blob = new Blob(chunks, { type: mime });
+    if (blob.size < 1500) { setBusy(false); return; }
+    runCommand({ audio_b64: await toBase64(blob), audio_mime: mime });
+  };
+  recorder.start();
+  $("mic").classList.add("recording");
+  $("hint").textContent = "Listening… tap again when done · सुन रहा हूँ";
+}
+
+// ---------------------------------------------------------------- parchi
+async function scanParchi(file) {
+  const out = $("parchiResult");
+  out.innerHTML = "";
+  const card = el("div", "card");
+  card.innerHTML = '<span class="spin"></span>Reading the bill with Sarvam Vision…';
+  out.append(card);
+  try {
+    const img = await shrinkImage(file);
+    const thumb = el("img", "thumb");
+    thumb.src = URL.createObjectURL(img);
+    const d = await api("/api/parchi", { image_b64: await toBase64(img), mime: img.type, language: state.lastLanguage });
+    card.innerHTML = "";
+    card.append(el("div", "section-title", `🧾 ${d.bill.supplier || "Supplier bill"}${d.bill.date ? " · " + d.bill.date : ""}`));
+    const table = el("table", "bill");
+    for (const i of d.bill.items || []) {
+      const tr = el("tr");
+      tr.append(el("td", null, `${i.name}${i.qty ? " · " + i.qty : ""}`), el("td", null, rupees(i.amount || 0)));
+      table.append(tr);
+    }
+    const tr = el("tr", "total");
+    tr.append(el("td", null, "Total"), el("td", null, rupees(d.bill.total)));
+    table.append(tr);
+    card.append(table, el("p", null, "✅ " + d.reply));
+    const row = el("div", "row");
+    row.style.display = "flex"; row.style.gap = "6px"; row.style.flexWrap = "wrap";
+    row.append(badge("👁 Sarvam Vision", d.ms.vision), badge("🧠 Sarvam-105B", d.ms.llm));
+    card.append(row, thumb);
+    render(d.state);
+    say(d.reply, d.language, row);
+  } catch (err) {
+    card.innerHTML = "";
+    card.append(el("div", "error", err.message));
+  }
+}
+
+// ---------------------------------------------------------------- tabs & init
+function showTab(name) {
+  document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === name));
+  document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === "panel-" + name));
+  $("dock").classList.toggle("hidden", name === "parchi");
+}
+
+async function init() {
+  state.languages = await api("/api/languages");
+  render(await api("/api/state"));
+  document.querySelectorAll(".tab").forEach((t) => (t.onclick = () => showTab(t.dataset.tab)));
+  for (const ex of EXAMPLES) {
+    const b = el("button", "example", ex);
+    b.type = "button";
+    b.onclick = () => runCommand({ text: ex }, ex);
+    $("examples").append(b);
+  }
+  $("mic").onclick = toggleMic;
+  $("typebar").onsubmit = (e) => {
+    e.preventDefault();
+    const t = $("typed").value.trim();
+    if (!t) return;
+    $("typed").value = "";
+    runCommand({ text: t }, t);
+  };
+  $("demoBtn").onclick = async () => {
+    if (state.data.entries.length && !confirm("Replace the current khata with the demo shop?")) return;
+    $("feed").innerHTML = "";
+    $("emptyFeed").classList.remove("hidden");
+    render(await api("/api/demo", {}));
+  };
+  $("parchiPick").onclick = () => $("parchiFile").click();
+  $("parchiFile").onchange = (e) => e.target.files[0] && scanParchi(e.target.files[0]);
+  $("parchiSample").onclick = async () => {
+    const blob = await fetch("/samples/parchi.png").then((r) => r.blob());
+    scanParchi(new File([blob], "parchi.png", { type: "image/png" }));
+  };
+}
+init();
+</script>
+</body>
+</html>
