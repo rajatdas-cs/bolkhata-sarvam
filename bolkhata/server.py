@@ -10,7 +10,9 @@ import time
 import urllib.parse
 import uuid
 from datetime import datetime, timedelta
+from contextlib import contextmanager
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import httpx
 from fastapi import FastAPI, HTTPException
@@ -21,6 +23,7 @@ from sarvamai import SarvamAI
 from sarvamai.core.api_error import ApiError
 
 ROOT = Path(__file__).parent
+IST = ZoneInfo("Asia/Kolkata")  # The server may run in UTC; the shop's "today" is Indian time.
 # Vercel's filesystem is read-only except /tmp (which resets on cold starts).
 ON_VERCEL = bool(os.environ.get("VERCEL"))
 DATA = Path("/tmp/bolkhata") if ON_VERCEL else ROOT / "data"
@@ -105,18 +108,47 @@ CREATE TABLE IF NOT EXISTS entries (
 """
 
 
-def db() -> sqlite3.Connection:
-    conn = sqlite3.connect(DATA / "bolkhata.db")
-    conn.row_factory = sqlite3.Row
-    return conn
+DATABASE_URL = os.environ.get("DATABASE_URL")  # Supabase/Postgres; SQLite when unset.
+
+
+class PgConn:
+    """Gives a psycopg connection the small sqlite3-style API this file uses."""
+
+    def __init__(self, conn):
+        self.conn = conn
+
+    def execute(self, sql, params=()):
+        return self.conn.execute(sql.replace("?", "%s"), params)
+
+    def executescript(self, script):
+        for stmt in filter(str.strip, script.split(";")):
+            self.conn.execute(stmt)
+
+
+@contextmanager
+def db():
+    if DATABASE_URL:
+        import psycopg
+        from psycopg.rows import dict_row
+        raw = psycopg.connect(DATABASE_URL, row_factory=dict_row, prepare_threshold=None)
+        conn = PgConn(raw)
+    else:
+        raw = conn = sqlite3.connect(DATA / "bolkhata.db")
+        raw.row_factory = sqlite3.Row
+    try:
+        yield conn
+        raw.commit()
+    finally:
+        raw.close()
 
 
 with db() as conn:
-    conn.executescript(SCHEMA)
+    conn.executescript(SCHEMA.replace("INTEGER PRIMARY KEY", "SERIAL PRIMARY KEY").replace("REAL", "DOUBLE PRECISION")
+                       if DATABASE_URL else SCHEMA)
 
 
 def now() -> str:
-    return datetime.now().isoformat(timespec="seconds")
+    return datetime.now(IST).replace(tzinfo=None).isoformat(timespec="seconds")
 
 
 def shop_name(conn) -> str:
@@ -140,21 +172,20 @@ def find_or_create_customer(conn, name: str, language: str) -> sqlite3.Row:
     match = difflib.get_close_matches(name.lower(), list(by_key), n=1, cutoff=0.85)
     if match:
         return by_key[match[0]]
-    cur = conn.execute(
-        "INSERT INTO customers (name, language, created_at) VALUES (?, ?, ?)", (name, language, now())
-    )
-    return conn.execute("SELECT * FROM customers WHERE id = ?", (cur.lastrowid,)).fetchone()
+    return conn.execute(
+        "INSERT INTO customers (name, language, created_at) VALUES (?, ?, ?) RETURNING *", (name, language, now())
+    ).fetchone()
 
 
 def add_entry(conn, kind, amount, *, customer=None, party=None, items="", source, transcript=None,
               language=None, evidence=None, created_at=None) -> int:
     cur = conn.execute(
         """INSERT INTO entries (kind, customer_id, party, amount, items, source, transcript, language,
-                                evidence, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                evidence, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id""",
         (kind, customer["id"] if customer else None, party or (customer["name"] if customer else None),
-         float(amount), items or "", source, transcript, language, evidence, created_at or now()),
+         float(amount), str(items or ""), source, transcript, language, evidence, created_at or now()),
     )
-    return cur.lastrowid
+    return cur.fetchone()["id"]
 
 
 def entry_dict(row) -> dict:
@@ -164,7 +195,7 @@ def entry_dict(row) -> dict:
 def snapshot(conn) -> dict:
     """Everything the UI shows: totals, customers with balances, recent entries."""
     due = balances(conn)
-    today = datetime.now().date().isoformat()
+    today = now()[:10]
     totals = {k: 0.0 for k in KINDS}
     for r in conn.execute(
         "SELECT kind, SUM(amount) AS s FROM entries WHERE undone = 0 AND created_at >= ? GROUP BY kind", (today,)
@@ -182,7 +213,7 @@ def snapshot(conn) -> dict:
         "SELECT * FROM entries ORDER BY created_at DESC, id DESC LIMIT 200"
     )]
     # Last 7 days of totals per kind, for the trend sparklines.
-    first_day = datetime.now().date() - timedelta(days=6)
+    first_day = datetime.fromisoformat(now()).date() - timedelta(days=6)
     daily = {(first_day + timedelta(days=i)).isoformat(): {k: 0.0 for k in KINDS} for i in range(7)}
     for r in conn.execute(
         """SELECT substr(created_at, 1, 10) AS day, kind, SUM(amount) AS s FROM entries
@@ -582,9 +613,9 @@ def load_demo():
         ids = {}
         for name, (lang, phone) in people.items():
             ids[name] = conn.execute(
-                "INSERT INTO customers (name, phone, language, created_at) VALUES (?, ?, ?, ?)",
-                (name, phone, lang, now())).lastrowid
-        base = datetime.now().replace(hour=9, minute=0, second=0)
+                "INSERT INTO customers (name, phone, language, created_at) VALUES (?, ?, ?, ?) RETURNING id",
+                (name, phone, lang, now())).fetchone()["id"]
+        base = datetime.fromisoformat(now()).replace(hour=9, minute=0, second=0)
         history = [
             (6, "purchase", None, "Gupta Traders", 8400, "atta 50kg, chini 25kg, tel 15L"),
             (6, "credit", "Ramesh", None, 650, "atta, dal, sabun"),
@@ -612,9 +643,8 @@ def load_demo():
         return snapshot(conn)
 
 
-# On Vercel the ledger starts empty after every cold start, so open with the demo shop.
-if ON_VERCEL:
-    with db() as conn:
-        empty = conn.execute("SELECT COUNT(*) FROM customers").fetchone()[0] == 0
-    if empty:
-        load_demo()
+# A brand-new ledger (e.g. a Vercel cold start without Postgres) opens with the demo shop.
+with db() as conn:
+    empty = conn.execute("SELECT COUNT(*) AS n FROM customers").fetchone()["n"] == 0
+if empty:
+    load_demo()

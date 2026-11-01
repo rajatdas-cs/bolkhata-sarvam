@@ -1,3 +1,4 @@
 sarvamai
 fastapi
 httpx
+psycopg[binary]
