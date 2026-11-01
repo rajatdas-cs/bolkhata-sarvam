@@ -177,14 +177,24 @@ def snapshot(conn) -> dict:
         customers.append({**entry_dict(c), "balance": round(due.get(c["id"], 0), 2)})
     customers.sort(key=lambda c: (-c["balance"], c["name"]))
     entries = [entry_dict(r) for r in conn.execute(
-        "SELECT * FROM entries ORDER BY created_at DESC, id DESC LIMIT 60"
+        "SELECT * FROM entries ORDER BY created_at DESC, id DESC LIMIT 200"
     )]
+    # Last 7 days of totals per kind, for the trend sparklines.
+    first_day = datetime.now().date() - timedelta(days=6)
+    daily = {(first_day + timedelta(days=i)).isoformat(): {k: 0.0 for k in KINDS} for i in range(7)}
+    for r in conn.execute(
+        """SELECT substr(created_at, 1, 10) AS day, kind, SUM(amount) AS s FROM entries
+           WHERE undone = 0 AND created_at >= ? GROUP BY day, kind""", (first_day.isoformat(),)
+    ):
+        if r["day"] in daily:
+            daily[r["day"]][r["kind"]] = r["s"]
     return {
         "shop": shop_name(conn),
         "today": totals,
         "outstanding": round(sum(v for v in due.values() if v > 0), 2),
         "customers": customers,
         "entries": entries,
+        "daily": [{"date": day, **totals_by_kind} for day, totals_by_kind in daily.items()],
     }
 
 
@@ -285,8 +295,8 @@ Today is {today}. Ledger data (JSON):
 REMIND_PROMPT = """Write a short, warm and respectful payment reminder from the shop "{shop}" to its customer {name}, in {language} written in its native script. They owe {amount} in total. 2-3 sentences, like a friendly neighbourhood shopkeeper: no threats, no pressure, thank them for being a regular customer, and say they can pay at the shop or by UPI. Plain text only."""
 
 PARCHI_PROMPT = """You read OCR text of a supplier bill/parchi (often handwritten, Hindi/English mixed) for a small shop. Reply ONLY with JSON, no markdown:
-{"supplier": "supplier name in English letters or null", "date": "date as written or null", "items": [{"name": "item in English", "qty": "quantity as written", "amount": number}], "total": number}
-Use the bill's own total if written; otherwise add the item amounts. Never invent items."""
+{"supplier": "supplier name in English letters or null", "date": "date as written or null", "items": [{"name": "item name in English, without the quantity", "qty": "quantity with unit as written, e.g. 10kg, 2 dozen, 1 box", "amount": number}], "total": number}
+"amount" is the rupee price for that line (usually the right-most number). "qty" is never a price. Use the bill's own total if written; otherwise add the item amounts. Never invent items."""
 
 
 # ---------------------------------------------------------------- API
@@ -503,6 +513,12 @@ def parchi(req: ParchiRequest):
     start = time.time()
     bill = parse_json(chat(PARCHI_PROMPT, text))
     timings["llm"] = round((time.time() - start) * 1000)
+    for item in bill.get("items") or []:
+        # If the price landed in "qty", move it to "amount".
+        if not isinstance(item.get("amount"), (int, float)) or item["amount"] <= 0:
+            qty = str(item.get("qty") or "").replace(",", "")
+            if re.fullmatch(r"\d+(\.\d+)?", qty):
+                item["amount"], item["qty"] = float(qty), None
     total = bill.get("total")
     if not isinstance(total, (int, float)) or total <= 0:
         total = sum(i.get("amount") or 0 for i in bill.get("items") or [] if isinstance(i.get("amount"), (int, float)))

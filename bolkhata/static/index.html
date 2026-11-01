@@ -4,238 +4,518 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>BolKhata</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f4f1ea;
-    --card: #ffffff;
-    --ink: #1f1a14;
-    --muted: #776b5d;
-    --line: #e7dfd2;
-    --brand: #0f766e;
-    --brand-soft: #e0f2ef;
-    --credit: #c2410c;
-    --credit-soft: #fff1e6;
-    --payment: #15803d;
-    --payment-soft: #e9f8ee;
-    --sale: #1d4ed8;
-    --sale-soft: #e8efff;
-    --purchase: #7c3aed;
-    --purchase-soft: #f1ebff;
-    --expense: #57534e;
-    --expense-soft: #efedea;
-    --radius: 18px;
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --surface-2: #f9fafb;
+    --border: #e5e7eb;
+    --border-strong: #d1d5db;
+    --text: #0f172a;
+    --text-2: #475569;
+    --text-3: #94a3b8;
+    --brand: #4f46e5;
+    --brand-2: #7c3aed;
+    --brand-soft: #eef2ff;
+    --brand-ink: #3730a3;
+    --credit: #c2410c;  --credit-bg: #fff7ed;
+    --payment: #047857; --payment-bg: #ecfdf5;
+    --sale: #1d4ed8;    --sale-bg: #eff6ff;
+    --purchase: #6d28d9; --purchase-bg: #f5f3ff;
+    --expense: #475569; --expense-bg: #f1f5f9;
+    --danger: #dc2626;
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 1px rgba(15, 23, 42, 0.03);
+    --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.05);
+    --shadow-lg: 0 20px 50px rgba(15, 23, 42, 0.16);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --sidebar: 248px;
+    --rail: 340px;
   }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b0d12; --surface: #12151c; --surface-2: #171b23; --border: #232834; --border-strong: #2f3644;
+      --text: #e6e8ee; --text-2: #a3abbc; --text-3: #667085;
+      --brand: #818cf8; --brand-2: #a78bfa; --brand-soft: #1e1b4b; --brand-ink: #c7d2fe;
+      --credit: #fb923c; --credit-bg: #2a1708; --payment: #34d399; --payment-bg: #062019;
+      --sale: #60a5fa; --sale-bg: #0b1a33; --purchase: #a78bfa; --purchase-bg: #1d1438;
+      --expense: #94a3b8; --expense-bg: #161b24;
+      --shadow-sm: none; --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35); --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.55);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b0d12; --surface: #12151c; --surface-2: #171b23; --border: #232834; --border-strong: #2f3644;
+    --text: #e6e8ee; --text-2: #a3abbc; --text-3: #667085;
+    --brand: #818cf8; --brand-2: #a78bfa; --brand-soft: #1e1b4b; --brand-ink: #c7d2fe;
+    --credit: #fb923c; --credit-bg: #2a1708; --payment: #34d399; --payment-bg: #062019;
+    --sale: #60a5fa; --sale-bg: #0b1a33; --purchase: #a78bfa; --purchase-bg: #1d1438;
+    --expense: #94a3b8; --expense-bg: #161b24;
+    --shadow-sm: none; --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35); --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.55);
+  }
+
   * { box-sizing: border-box; }
-  html, body { margin: 0; background: var(--bg); color: var(--ink);
-    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", "Noto Sans", sans-serif; }
-  button { font: inherit; color: inherit; }
-  .app { max-width: 540px; margin: 0 auto; min-height: 100vh; padding-bottom: 210px; }
-
-  header { padding: 16px 16px 10px; display: flex; align-items: center; gap: 12px; }
-  .logo { width: 44px; height: 44px; border-radius: 13px; background: var(--brand); color: #fff;
-    display: grid; place-items: center; font-weight: 800; font-size: 20px; flex: none; }
-  .title { flex: 1; min-width: 0; }
-  .title h1 { margin: 0; font-size: 20px; letter-spacing: -0.01em; }
-  .title p { margin: 0; color: var(--muted); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ghost { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 7px 12px;
-    font-size: 13px; font-weight: 600; cursor: pointer; }
-
-  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 16px 12px; }
-  .tile { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; }
-  .tile .k { font-size: 12px; color: var(--muted); line-height: 1.3; }
-  .tile .v { font-size: 19px; font-weight: 800; margin-top: 2px; font-variant-numeric: tabular-nums; }
-  .tile.due .v { color: var(--credit); }
-  .tile.sale .v { color: var(--sale); }
-  .tile.got .v { color: var(--payment); }
-
-  .tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); display: flex; gap: 6px; padding: 6px 16px 10px; }
-  .tab { flex: 1; border: 0; border-radius: 12px; padding: 10px 6px; background: transparent; font-weight: 700;
-    color: var(--muted); cursor: pointer; }
-  .tab.active { background: var(--ink); color: #fff; }
-  .panel { display: none; padding: 0 16px; }
-  .panel.active { display: block; }
-
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; margin-bottom: 12px; }
-  .empty { text-align: center; color: var(--muted); padding: 22px 10px; }
-  .empty h2 { color: var(--ink); font-size: 18px; margin: 0 0 6px; }
-  .examples { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
-  .example { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 7px 12px;
-    font-size: 14px; cursor: pointer; }
-
-  /* conversation */
-  .turn { margin-bottom: 14px; }
-  .said { margin-left: auto; max-width: 88%; background: var(--brand-soft); border-radius: 16px 16px 4px 16px;
-    padding: 10px 12px; width: fit-content; }
-  .said .meta { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--brand); font-weight: 700; margin-bottom: 2px; }
-  .reply { max-width: 92%; background: var(--card); border: 1px solid var(--line); border-radius: 16px 16px 16px 4px;
-    padding: 10px 12px; margin-top: 8px; }
-  .reply.pending { color: var(--muted); font-style: italic; }
-  .reply .row { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
-  .badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #f1ece3; color: var(--muted); }
-  .badge b { color: var(--ink); }
-  .icon-btn { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 4px 10px;
-    font-size: 13px; cursor: pointer; }
-
-  .entry { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 12px; margin-top: 8px; }
-  .entry .kind { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
-  .entry .who { font-weight: 700; }
-  .entry .items { font-size: 13px; color: var(--muted); }
-  .entry .amt { margin-left: auto; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .entry .grow { min-width: 0; flex: 1; }
-  .entry.undone { opacity: 0.45; }
-  .entry.undone .amt { text-decoration: line-through; }
-  .k-credit { background: var(--credit-soft); } .k-credit .kind, .k-credit .amt { color: var(--credit); }
-  .k-payment { background: var(--payment-soft); } .k-payment .kind, .k-payment .amt { color: var(--payment); }
-  .k-sale { background: var(--sale-soft); } .k-sale .kind, .k-sale .amt { color: var(--sale); }
-  .k-purchase { background: var(--purchase-soft); } .k-purchase .kind, .k-purchase .amt { color: var(--purchase); }
-  .k-expense { background: var(--expense-soft); } .k-expense .kind, .k-expense .amt { color: var(--expense); }
-
-  .reminder { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; padding: 12px; margin-top: 8px; }
-  .reminder .head { font-size: 12px; font-weight: 800; color: var(--payment); text-transform: uppercase; letter-spacing: 0.04em; }
-  .reminder p { margin: 6px 0 10px; }
-  .wa { display: inline-flex; align-items: center; gap: 6px; background: #16a34a; color: #fff; text-decoration: none;
-    font-weight: 700; padding: 8px 14px; border-radius: 999px; font-size: 14px; }
-
-  /* dock */
-  .dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
-    background: linear-gradient(to top, var(--bg) 78%, rgba(244, 241, 234, 0)); padding: 18px 16px calc(14px + env(safe-area-inset-bottom)); }
-  .dock-inner { max-width: 508px; margin: 0 auto; }
-  .mic { width: 82px; height: 82px; border-radius: 50%; border: 0; display: grid; place-items: center; margin: 0 auto;
-    background: var(--brand); color: #fff; font-size: 34px; cursor: pointer; box-shadow: 0 8px 22px rgba(15, 118, 110, 0.35); }
-  .mic.recording { background: #dc2626; animation: pulse 1.2s ease-in-out infinite; }
-  .mic.busy { background: var(--muted); }
-  @keyframes pulse { 50% { box-shadow: 0 0 0 16px rgba(220, 38, 38, 0.15); } }
-  .hint { text-align: center; font-size: 13px; color: var(--muted); margin: 6px 0 8px; }
-  .typebar { display: flex; gap: 8px; }
-  .typebar input { flex: 1; min-width: 0; font: inherit; padding: 11px 14px; border-radius: 12px; border: 1px solid var(--line); background: #fff; }
-  .send { border: 0; background: var(--ink); color: #fff; border-radius: 12px; padding: 0 16px; font-weight: 700; cursor: pointer; }
-
-  /* khata */
-  .cust { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
-  .cust:last-child { border-bottom: 0; }
-  .avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 800;
-    background: var(--brand-soft); color: var(--brand); flex: none; }
-  .cust .grow { flex: 1; min-width: 0; }
-  .cust .name { font-weight: 700; }
-  .cust select { font: inherit; font-size: 12px; border: 1px solid var(--line); border-radius: 8px; padding: 2px 4px; background: #fff; color: var(--muted); max-width: 140px; }
-  .cust .bal { text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; }
-  .cust .bal small { display: block; font-size: 11px; font-weight: 600; color: var(--muted); }
-  .bal.due { color: var(--credit); } .bal.clear { color: var(--payment); }
-  .section-title { font-size: 13px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 18px 2px 8px; }
-
-  /* parchi */
-  .scan { border: 2px dashed var(--line); border-radius: var(--radius); padding: 24px; text-align: center; background: var(--card); }
-  .btn { border: 0; border-radius: 14px; padding: 13px 18px; font-weight: 700; cursor: pointer; background: var(--brand); color: #fff; width: 100%; }
-  .btn.secondary { background: var(--brand-soft); color: var(--brand); margin-top: 8px; }
-  .bill { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 15px; }
-  .bill td { padding: 7px 0; border-bottom: 1px solid var(--line); }
-  .bill td:last-child { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .bill tr.total td { border-bottom: 0; font-size: 17px; font-weight: 800; }
-  .thumb { max-width: 100%; max-height: 200px; border-radius: 12px; margin-top: 10px; border: 1px solid var(--line); }
-  .error { color: #b91c1c; background: #fef2f2; border-radius: 12px; padding: 10px 12px; margin-top: 10px; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); }
+  body { font: 14px/1.5 Inter, system-ui, -apple-system, "Segoe UI", "Noto Sans", sans-serif;
+    -webkit-font-smoothing: antialiased; font-feature-settings: "cv11", "ss01"; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  input, select { font: inherit; color: inherit; }
+  svg.i { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .num { font-variant-numeric: tabular-nums; }
   .hidden { display: none !important; }
-  .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid currentColor; border-top-color: transparent;
-    border-radius: 50%; animation: rot 0.8s linear infinite; vertical-align: -2px; margin-right: 6px; }
+
+  /* ------------------------------------------------ shell */
+  .shell { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr) var(--rail); min-height: 100vh; }
+  .sidebar { position: sticky; top: 0; height: 100vh; border-right: 1px solid var(--border); background: var(--surface);
+    display: flex; flex-direction: column; padding: 16px 12px; gap: 4px; }
+  .brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 16px; }
+  .brand-mark { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; color: #fff; font-weight: 700;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2)); box-shadow: var(--shadow-sm); font-size: 15px; }
+  .brand-name { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+  .brand-sub { font-size: 12px; color: var(--text-3); }
+  .shop { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius);
+    margin-bottom: 12px; background: var(--surface-2); }
+  .shop-avatar { width: 28px; height: 28px; border-radius: 7px; background: var(--payment-bg); color: var(--payment);
+    display: grid; place-items: center; font-weight: 700; font-size: 12px; flex: none; }
+  .shop-name { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .shop-meta { font-size: 11px; color: var(--text-3); }
+  .nav-label { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; padding: 10px 10px 4px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); border: 0;
+    background: transparent; color: var(--text-2); font-weight: 500; text-align: left; width: 100%; }
+  .nav-item:hover { background: var(--surface-2); color: var(--text); }
+  .nav-item.active { background: var(--brand-soft); color: var(--brand-ink); }
+  .nav-item .count { margin-left: auto; font-size: 11px; color: var(--text-3); font-weight: 600; }
+  .sidebar-foot { margin-top: auto; display: flex; flex-direction: column; gap: 4px; }
+  .powered { font-size: 11px; color: var(--text-3); padding: 8px 10px 0; line-height: 1.6; }
+  .powered b { color: var(--text-2); font-weight: 600; }
+
+  .main { min-width: 0; display: flex; flex-direction: column; }
+  .topbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 12px; padding: 14px 28px;
+    background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid transparent; }
+  .topbar.scrolled { border-bottom-color: var(--border); }
+  .page-title { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+  .page-sub { font-size: 12px; color: var(--text-3); }
+  .topbar .spacer { flex: 1; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; font-size: 12px;
+    font-weight: 500; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); white-space: nowrap; }
+  .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; padding: 0 12px;
+    border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); font-weight: 500;
+    font-size: 13px; box-shadow: var(--shadow-sm); white-space: nowrap; text-decoration: none; color: var(--text); }
+  .btn:hover { border-color: var(--border-strong); }
+  .btn.primary { background: var(--text); color: var(--surface); border-color: var(--text); }
+  .btn.brand { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff; border: 0; }
+  .btn.ghost { background: transparent; box-shadow: none; border-color: transparent; color: var(--text-2); }
+  .btn.ghost:hover { background: var(--surface-2); color: var(--text); }
+  .btn.sm { height: 28px; padding: 0 9px; font-size: 12px; }
+  .btn.icon { width: 32px; padding: 0; }
+  .btn.icon.sm { width: 28px; }
+  .btn.wa { background: #16a34a; border-color: #16a34a; color: #fff; }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+
+  .content { padding: 4px 28px 120px; max-width: 980px; width: 100%; margin: 0 auto; }
+  .view { display: none; }
+  .view.active { display: block; animation: fade 0.18s ease-out; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } }
+
+  /* ------------------------------------------------ KPIs */
+  .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 8px 0 20px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 14px 10px; box-shadow: var(--shadow-sm); }
+  .kpi-head { display: flex; align-items: center; gap: 6px; color: var(--text-2); font-size: 12px; font-weight: 500; }
+  .kpi-head .ic { width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; }
+  .kpi-head .ic svg { width: 13px; height: 13px; }
+  .kpi-value { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin-top: 8px; }
+  .kpi-foot { display: flex; align-items: end; justify-content: space-between; gap: 8px; margin-top: 2px; }
+  .kpi-note { font-size: 11px; color: var(--text-3); }
+  .spark { width: 84px; height: 26px; }
+
+  /* ------------------------------------------------ composer */
+  .composer { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow-md);
+    padding: 6px; transition: border-color 0.15s, box-shadow 0.15s; }
+  .composer:focus-within { border-color: color-mix(in srgb, var(--brand) 55%, var(--border)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 14%, transparent), var(--shadow-md); }
+  .composer-row { display: flex; align-items: center; gap: 6px; }
+  .composer input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; padding: 12px 10px; font-size: 15px; }
+  .composer input::placeholder { color: var(--text-3); }
+  .kbd { font-size: 11px; color: var(--text-3); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; margin-right: 4px; }
+  .mic { width: 44px; height: 44px; border-radius: 12px; border: 0; display: grid; place-items: center; color: #fff; flex: none;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2)); box-shadow: 0 6px 16px color-mix(in srgb, var(--brand) 35%, transparent); }
+  .mic svg { width: 20px; height: 20px; }
+  .mic.recording { background: var(--danger); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); animation: ring 1.4s infinite; }
+  @keyframes ring { 70% { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); } }
+  .send { width: 36px; height: 36px; border-radius: 10px; border: 0; background: var(--text); color: var(--surface); display: grid; place-items: center; flex: none; }
+  .send:disabled { opacity: 0.25; }
+  .recbar { display: flex; align-items: center; gap: 12px; padding: 10px 12px; flex: 1; }
+  .wave { display: flex; align-items: center; gap: 3px; height: 28px; flex: 1; }
+  .wave span { width: 3px; border-radius: 2px; background: var(--danger); height: 4px; transition: height 0.08s; }
+  .rec-time { font-size: 13px; font-weight: 600; color: var(--danger); }
+  .suggest { display: flex; gap: 8px; flex-wrap: wrap; padding: 4px 6px 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); background: var(--surface-2);
+    border-radius: 999px; padding: 5px 11px; font-size: 12.5px; color: var(--text-2); }
+  .chip:hover { border-color: var(--border-strong); color: var(--text); }
+  .chip svg { width: 13px; height: 13px; color: var(--brand); }
+
+  /* ------------------------------------------------ feed */
+  .feed { margin-top: 20px; display: flex; flex-direction: column; gap: 14px; }
+  .turn { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden; animation: fade 0.2s ease-out; }
+  .turn-q { display: flex; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+  .who { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; flex: none; font-size: 12px; font-weight: 600; }
+  .who.you { background: var(--expense-bg); color: var(--text-2); }
+  .who.ai { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff; }
+  .who svg { width: 14px; height: 14px; }
+  .q-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: var(--text-3); margin-bottom: 2px; }
+  .lang { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 999px; background: var(--brand-soft);
+    color: var(--brand-ink); font-weight: 600; font-size: 11px; }
+  .lang svg { width: 11px; height: 11px; }
+  .q-text { font-size: 15px; color: var(--text); }
+  .turn-a { display: flex; gap: 12px; padding: 14px 16px 12px; }
+  .a-body { flex: 1; min-width: 0; }
+  .a-text { font-size: 15px; line-height: 1.6; }
+  .a-foot { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+  .trace { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-3); }
+  .trace .step { display: inline-flex; gap: 4px; padding: 2px 7px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border); }
+  .trace .step b { color: var(--text-2); font-weight: 600; }
+  .trace .arrow { color: var(--border-strong); }
+  .skeleton { height: 12px; border-radius: 6px; background: linear-gradient(90deg, var(--surface-2), var(--border), var(--surface-2));
+    background-size: 200% 100%; animation: shimmer 1.2s infinite; margin: 6px 0; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+  .err { color: var(--danger); font-size: 13px; margin-top: 6px; }
+
+  /* ------------------------------------------------ entries */
+  .entries { margin-top: 12px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .entry { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 10px 12px; }
+  .entry + .entry { border-top: 1px solid var(--border); }
+  .tag { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 6px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .t-credit { background: var(--credit-bg); color: var(--credit); }
+  .t-payment { background: var(--payment-bg); color: var(--payment); }
+  .t-sale { background: var(--sale-bg); color: var(--sale); }
+  .t-purchase { background: var(--purchase-bg); color: var(--purchase); }
+  .t-expense { background: var(--expense-bg); color: var(--expense); }
+  .e-main { min-width: 0; }
+  .e-who { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .e-items { font-size: 12px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .e-amt { font-weight: 600; text-align: right; }
+  .amt-credit { color: var(--credit); } .amt-payment { color: var(--payment); }
+  .e-actions { display: flex; gap: 2px; }
+  .entry.undone { opacity: 0.45; }
+  .entry.undone .e-amt { text-decoration: line-through; }
+
+  /* ------------------------------------------------ reminder card */
+  .reminder { margin-top: 12px; border: 1px solid color-mix(in srgb, var(--payment) 30%, var(--border)); background: var(--payment-bg); border-radius: 12px; padding: 14px; }
+  .reminder-head { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--payment); }
+  .reminder-text { margin: 8px 0 12px; font-size: 14.5px; line-height: 1.6; color: var(--text); }
+  .reminder-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ------------------------------------------------ tables */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+  .card-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  .card-title { font-weight: 600; }
+  .card-sub { font-size: 12px; color: var(--text-3); }
+  .seg { display: inline-flex; padding: 3px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; gap: 2px; flex-wrap: wrap; }
+  .seg button { border: 0; background: transparent; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; color: var(--text-2); }
+  .seg button.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+  table.data { width: 100%; border-collapse: collapse; }
+  table.data th { text-align: left; font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+  table.data td { padding: 11px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  table.data tr:last-child td { border-bottom: 0; }
+  table.data tr:hover td { background: var(--surface-2); }
+  table.data .r { text-align: right; }
+  .day-row td { background: var(--surface-2) !important; font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; padding: 6px 16px !important; }
+  .person { display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 600; flex: none; }
+  .p-name { font-weight: 600; }
+  .p-sub { font-size: 12px; color: var(--text-3); }
+  .select { border: 1px solid var(--border); background: var(--surface); border-radius: 7px; padding: 3px 6px; font-size: 12px; color: var(--text-2); }
+  .bar { height: 4px; background: var(--surface-2); border-radius: 2px; overflow: hidden; margin-top: 6px; }
+  .bar span { display: block; height: 100%; background: var(--credit); border-radius: 2px; }
+  .muted { color: var(--text-3); }
+  .empty { padding: 36px 16px; text-align: center; color: var(--text-3); }
+  .empty-title { color: var(--text); font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+
+  /* ------------------------------------------------ bills */
+  .drop { border: 1.5px dashed var(--border-strong); border-radius: 14px; background: var(--surface); padding: 36px 20px; text-align: center; transition: border-color 0.15s, background 0.15s; }
+  .drop.over { border-color: var(--brand); background: var(--brand-soft); }
+  .drop-icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; margin: 0 auto 12px; background: var(--purchase-bg); color: var(--purchase); }
+  .drop-icon svg { width: 22px; height: 22px; }
+  .drop h3 { margin: 0 0 4px; font-size: 15px; }
+  .drop p { margin: 0 0 16px; color: var(--text-3); }
+  .bill { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 0; margin-top: 16px; overflow: hidden; }
+  .bill-img { background: var(--surface-2); border-right: 1px solid var(--border); display: grid; place-items: center; padding: 12px; }
+  .bill-img img { max-width: 100%; max-height: 260px; border-radius: 8px; box-shadow: var(--shadow-md); }
+  .bill-body { padding: 0; min-width: 0; }
+  .bill-total td { font-weight: 700; font-size: 15px; }
+
+  /* ------------------------------------------------ rail */
+  .rail { position: sticky; top: 0; height: 100vh; overflow: auto; border-left: 1px solid var(--border); background: var(--surface); padding: 18px 16px; }
+  .rail-title { display: flex; align-items: center; justify-content: space-between; font-weight: 600; margin: 0 0 10px; }
+  .rail-title .btn { font-weight: 500; }
+  .recv { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .recv:last-child { border-bottom: 0; }
+  .recv .grow { flex: 1; min-width: 0; }
+  .recv-amt { font-weight: 600; color: var(--credit); }
+  .rail-section { margin-bottom: 22px; }
+  .activity { display: flex; gap: 10px; padding: 8px 0; font-size: 13px; }
+  .activity .dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex: none; }
+  .activity .when { font-size: 11px; color: var(--text-3); }
+
+  /* ------------------------------------------------ sheet + toast */
+  .scrim { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.35); backdrop-filter: blur(2px); z-index: 60; display: grid; place-items: center; padding: 16px; animation: fade 0.15s; }
+  .sheet { width: min(520px, 100%); background: var(--surface); border-radius: 16px; box-shadow: var(--shadow-lg); border: 1px solid var(--border); overflow: hidden; }
+  .sheet-head { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+  .sheet-body { padding: 18px; }
+  .sheet-foot { display: flex; gap: 8px; justify-content: flex-end; padding: 14px 18px; border-top: 1px solid var(--border); background: var(--surface-2); flex-wrap: wrap; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 80; background: var(--text); color: var(--surface);
+    padding: 10px 14px; border-radius: 10px; font-size: 13px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 8px; animation: fade 0.18s; }
+  .spin { width: 14px; height: 14px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: rot 0.7s linear infinite; display: inline-block; }
   @keyframes rot { to { transform: rotate(360deg); } }
+
+  /* ------------------------------------------------ mobile */
+  .mobile-nav { display: none; }
+  @media (max-width: 1240px) {
+    .shell { grid-template-columns: var(--sidebar) minmax(0, 1fr); }
+    .rail { display: none; }
+  }
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: minmax(0, 1fr); }
+    .sidebar { display: none; }
+    .topbar { padding: 12px 16px; }
+    .content { padding: 4px 16px 170px; }
+    .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .spark { display: none; }
+    .hide-sm { display: none !important; }
+    .composer-dock { position: fixed; left: 0; right: 0; bottom: calc(58px + env(safe-area-inset-bottom)); z-index: 30; padding: 10px 12px;
+      background: linear-gradient(to top, var(--bg) 70%, transparent); }
+    .composer-dock .suggest { display: none; }
+    .mobile-nav { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+      background: var(--surface); border-top: 1px solid var(--border); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); }
+    .mobile-nav button { border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 2px;
+      font-size: 11px; font-weight: 500; color: var(--text-3); padding: 4px; }
+    .mobile-nav button.active { color: var(--brand); }
+    .mobile-nav svg.i { width: 20px; height: 20px; }
+    table.data th:nth-child(n+3):not(.keep), table.data td:nth-child(n+3):not(.keep) { display: none; }
+    .bill { grid-template-columns: 1fr; }
+    .bill-img { border-right: 0; border-bottom: 1px solid var(--border); }
+    .feed { margin-top: 14px; }
+  }
 </style>
 </head>
 <body>
-<div class="app">
-  <header>
-    <div class="logo">बो</div>
-    <div class="title">
-      <h1>BolKhata</h1>
-      <p id="shopName">Bolo, khata likh jaayega · Speak, it's recorded</p>
+<div class="shell">
+  <!-- ============================================ sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">बो</div>
+      <div>
+        <div class="brand-name">BolKhata</div>
+        <div class="brand-sub">Voice ledger for shops</div>
+      </div>
     </div>
-    <button class="ghost" id="demoBtn" type="button">Load demo shop</button>
-  </header>
-
-  <div class="tiles">
-    <div class="tile due"><div class="k">Udhaar baaki<br>Total due</div><div class="v" id="tDue">₹0</div></div>
-    <div class="tile sale"><div class="k">Aaj ki bikri<br>Sales today</div><div class="v" id="tSale">₹0</div></div>
-    <div class="tile got"><div class="k">Aaj mila<br>Received today</div><div class="v" id="tGot">₹0</div></div>
-  </div>
-
-  <nav class="tabs">
-    <button class="tab active" data-tab="bolo" type="button">🎙 Bolo</button>
-    <button class="tab" data-tab="khata" type="button">📒 Khata</button>
-    <button class="tab" data-tab="parchi" type="button">🧾 Parchi</button>
-  </nav>
-
-  <section class="panel active" id="panel-bolo">
-    <div class="card empty" id="emptyFeed">
-      <h2>Just speak, in any language</h2>
-      Tap the mic and say what happened. BolKhata understands Hindi, Tamil, Bengali, Hinglish and more, and replies in your language.
-      <div class="examples" id="examples"></div>
+    <div class="shop">
+      <div class="shop-avatar" id="shopAvatar">SG</div>
+      <div style="min-width:0">
+        <div class="shop-name" id="shopName">My shop</div>
+        <div class="shop-meta">Kirana · Lucknow</div>
+      </div>
     </div>
-    <div id="feed"></div>
-  </section>
-
-  <section class="panel" id="panel-khata">
-    <div class="section-title">Customers · ग्राहक</div>
-    <div class="card" id="customers"></div>
-    <div class="section-title">Bahi · Recent entries</div>
-    <div class="card" id="entries"></div>
-  </section>
-
-  <section class="panel" id="panel-parchi">
-    <div class="scan">
-      <div style="font-size:38px">🧾</div>
-      <p style="margin:6px 0 14px;color:var(--muted)">Photograph a supplier's bill. Even handwritten ones become a purchase entry.</p>
-      <button class="btn" id="parchiPick" type="button">📷 Scan a parchi</button>
-      <button class="btn secondary" id="parchiSample" type="button">Try the sample parchi</button>
-      <input type="file" id="parchiFile" accept="image/*" capture="environment" hidden>
+    <div class="nav-label">Workspace</div>
+    <button class="nav-item active" data-view="assistant" type="button"><svg class="i"><use href="#i-sparkles"/></svg>Assistant</button>
+    <button class="nav-item" data-view="ledger" type="button"><svg class="i"><use href="#i-book"/></svg>Ledger<span class="count num" id="navLedger"></span></button>
+    <button class="nav-item" data-view="customers" type="button"><svg class="i"><use href="#i-users"/></svg>Customers<span class="count num" id="navCustomers"></span></button>
+    <button class="nav-item" data-view="bills" type="button"><svg class="i"><use href="#i-receipt"/></svg>Supplier bills</button>
+    <div class="sidebar-foot">
+      <button class="nav-item" id="demoBtn" type="button"><svg class="i"><use href="#i-reset"/></svg>Load demo shop</button>
+      <button class="nav-item" id="themeBtn" type="button"><svg class="i"><use href="#i-moon"/></svg>Toggle theme</button>
+      <div class="powered">Powered by <b>Sarvam AI</b><br>Saaras · Sarvam-105B · Bulbul · Vision</div>
     </div>
-    <div id="parchiResult"></div>
-  </section>
+  </aside>
+
+  <!-- ============================================ main -->
+  <main class="main">
+    <header class="topbar" id="topbar">
+      <div>
+        <div class="page-title" id="pageTitle">Assistant</div>
+        <div class="page-sub" id="pageSub">Speak or type in any Indian language</div>
+      </div>
+      <div class="spacer"></div>
+      <span class="pill hide-sm"><span class="dot"></span>Language auto-detect</span>
+      <button class="btn sm hide-sm" id="demoBtnTop" type="button"><svg class="i"><use href="#i-reset"/></svg>Demo shop</button>
+    </header>
+
+    <div class="content">
+      <!-- assistant -->
+      <section class="view active" id="view-assistant">
+        <div class="kpis" id="kpis"></div>
+        <div class="composer-dock">
+          <div class="composer" id="composer">
+            <form class="composer-row" id="composerForm">
+              <div class="recbar hidden" id="recbar">
+                <span class="rec-time num" id="recTime">0:00</span>
+                <div class="wave" id="wave"></div>
+                <span class="muted hide-sm">Listening · tap stop when done</span>
+              </div>
+              <input id="typed" placeholder="Record an entry or ask anything — “Ramesh ko 500 udhaar diya”" autocomplete="off">
+              <span class="kbd hide-sm" id="kbdHint">/</span>
+              <button class="send" id="sendBtn" type="submit" aria-label="Send" disabled><svg class="i"><use href="#i-arrow-up"/></svg></button>
+              <button class="mic" id="mic" type="button" aria-label="Speak"><svg class="i"><use href="#i-mic"/></svg></button>
+            </form>
+            <div class="suggest" id="suggest"></div>
+          </div>
+        </div>
+        <div class="feed" id="feed"></div>
+        <div class="card empty" id="feedEmpty" style="margin-top:20px">
+          <div class="empty-title">Your shop's assistant</div>
+          Speak naturally in Hindi, Tamil, Bengali, Hinglish or any Indian language. Entries are recorded, read back and kept with the original voice note.
+        </div>
+      </section>
+
+      <!-- ledger -->
+      <section class="view" id="view-ledger">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Ledger</div>
+              <div class="card-sub" id="ledgerSub"></div>
+            </div>
+            <div class="spacer" style="flex:1"></div>
+            <div class="seg" id="ledgerFilter"></div>
+          </div>
+          <table class="data" id="ledgerTable"></table>
+        </div>
+      </section>
+
+      <!-- customers -->
+      <section class="view" id="view-customers">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Receivables</div>
+              <div class="card-sub" id="custSub"></div>
+            </div>
+          </div>
+          <table class="data" id="custTable"></table>
+        </div>
+      </section>
+
+      <!-- bills -->
+      <section class="view" id="view-bills">
+        <div class="drop" id="drop">
+          <div class="drop-icon"><svg class="i"><use href="#i-camera"/></svg></div>
+          <h3>Scan a supplier bill</h3>
+          <p>Photograph or drop a parchi, even a handwritten one. Sarvam Vision reads every line item.</p>
+          <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+            <button class="btn primary" id="billPick" type="button"><svg class="i"><use href="#i-camera"/></svg>Upload or take photo</button>
+            <button class="btn" id="billSample" type="button"><svg class="i"><use href="#i-image"/></svg>Use sample parchi</button>
+          </div>
+          <input type="file" id="billFile" accept="image/*" capture="environment" hidden>
+        </div>
+        <div id="bills"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ============================================ rail -->
+  <aside class="rail">
+    <div class="rail-section">
+      <div class="rail-title">Top receivables <button class="btn ghost sm" data-goto="customers" type="button">View all</button></div>
+      <div id="railRecv"></div>
+    </div>
+    <div class="rail-section">
+      <div class="rail-title">Recent activity <button class="btn ghost sm" data-goto="ledger" type="button">Ledger</button></div>
+      <div id="railActivity"></div>
+    </div>
+  </aside>
 </div>
 
-<div class="dock" id="dock">
-  <div class="dock-inner">
-    <button class="mic" id="mic" type="button" aria-label="Speak">🎙</button>
-    <div class="hint" id="hint">Tap to speak · बोलने के लिए दबाएँ</div>
-    <form class="typebar" id="typebar">
-      <input id="typed" placeholder="Or type: Ramesh ko 500 udhaar…" autocomplete="off">
-      <button class="send" type="submit">Send</button>
-    </form>
-  </div>
-</div>
+<nav class="mobile-nav">
+  <button class="active" data-view="assistant" type="button"><svg class="i"><use href="#i-sparkles"/></svg>Assistant</button>
+  <button data-view="ledger" type="button"><svg class="i"><use href="#i-book"/></svg>Ledger</button>
+  <button data-view="customers" type="button"><svg class="i"><use href="#i-users"/></svg>Customers</button>
+  <button data-view="bills" type="button"><svg class="i"><use href="#i-receipt"/></svg>Bills</button>
+</nav>
+
+<!-- icon sprite (Lucide, ISC licence) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></symbol>
+  <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></symbol>
+  <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
+  <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-msg" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></symbol>
+  <symbol id="i-in" viewBox="0 0 24 24"><path d="M17 7 7 17"/><path d="M17 17H7V7"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+  <symbol id="i-keyboard" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+</svg>
 
 <script>
 const $ = (id) => document.getElementById(id);
-const NATIVE = {
-  "hi-IN": "हिन्दी", "en-IN": "English", "bn-IN": "বাংলা", "ta-IN": "தமிழ்", "te-IN": "తెలుగు",
-  "mr-IN": "मराठी", "gu-IN": "ગુજરાતી", "kn-IN": "ಕನ್ನಡ", "ml-IN": "മലയാളം", "pa-IN": "ਪੰਜਾਬੀ", "od-IN": "ଓଡ଼ିଆ",
-  "ur-IN": "اردو", "as-IN": "অসমীয়া", "ne-IN": "नेपाली",
+const icon = (name, cls = "i") => `<svg class="${cls}"><use href="#i-${name}"/></svg>`;
+const LANG = {
+  "hi-IN": ["Hindi", "हिन्दी"], "en-IN": ["English", "English"], "bn-IN": ["Bengali", "বাংলা"], "ta-IN": ["Tamil", "தமிழ்"],
+  "te-IN": ["Telugu", "తెలుగు"], "mr-IN": ["Marathi", "मराठी"], "gu-IN": ["Gujarati", "ગુજરાતી"], "kn-IN": ["Kannada", "ಕನ್ನಡ"],
+  "ml-IN": ["Malayalam", "മലയാളം"], "pa-IN": ["Punjabi", "ਪੰਜਾਬੀ"], "od-IN": ["Odia", "ଓଡ଼ିଆ"], "ur-IN": ["Urdu", "اردو"],
 };
-const LANG_NAME = {
-  "hi-IN": "Hindi", "en-IN": "English", "bn-IN": "Bengali", "ta-IN": "Tamil", "te-IN": "Telugu", "mr-IN": "Marathi",
-  "gu-IN": "Gujarati", "kn-IN": "Kannada", "ml-IN": "Malayalam", "pa-IN": "Punjabi", "od-IN": "Odia", "ur-IN": "Urdu",
-};
+const langName = (c) => (LANG[c] || [c])[0];
 const KIND = {
-  credit: "Udhaar diya", payment: "Paise mile", sale: "Bikri", purchase: "Kharida", expense: "Kharcha",
+  credit: "Credit given", payment: "Payment received", sale: "Cash sale", purchase: "Purchase", expense: "Expense",
 };
-const EXAMPLES = [
+const SUGGESTIONS = [
   "Ramesh ko 500 ka saaman udhaar diya",
-  "Lakshmi ne 300 rupaye wapas diye",
-  "Aaj kitni bikri hui?",
+  "லட்சுமி 500 ரூபாய் திருப்பிக் கொடுத்தாங்க",
+  "Sabse zyada udhaar kiska hai?",
   "Abdul ko payment reminder bhejo",
 ];
-const state = { data: null, languages: [], player: null, queue: [], lastLanguage: "hi-IN" };
+const AVATAR_COLORS = [["#eef2ff", "#4338ca"], ["#ecfdf5", "#047857"], ["#fff7ed", "#c2410c"], ["#f5f3ff", "#6d28d9"],
+  ["#eff6ff", "#1d4ed8"], ["#fdf2f8", "#be185d"], ["#f0fdfa", "#0f766e"]];
+const VIEWS = {
+  assistant: ["Assistant", "Speak or type in any Indian language"],
+  ledger: ["Ledger", "Every entry, with the original voice note or bill"],
+  customers: ["Customers", "Who owes what, and reminders in their language"],
+  bills: ["Supplier bills", "Turn parchis into purchase entries"],
+};
+const state = { data: null, languages: [], view: "assistant", filter: "all", player: null, queue: [], lastLanguage: "hi-IN" };
 
-// ---------------------------------------------------------------- helpers
+// ---------------------------------------------------------------- utils
 function el(tag, cls, text) {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
   if (text != null) n.textContent = text;
   return n;
 }
-const rupees = (x) => "₹" + Math.round(x).toLocaleString("en-IN");
+const rupees = (x) => "₹" + Math.round(Math.abs(x)).toLocaleString("en-IN");
 const secs = (ms) => (ms / 1000).toFixed(1) + "s";
-function badge(name, ms) {
-  const b = el("span", "badge", name + " ");
-  b.append(el("b", null, secs(ms)));
-  return b;
+const initials = (name) => name.split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+function avatar(name, size = 30) {
+  let h = 0;
+  for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const [bg, fg] = AVATAR_COLORS[h % AVATAR_COLORS.length];
+  const a = el("div", "avatar", initials(name));
+  Object.assign(a.style, { background: bg, color: fg, width: size + "px", height: size + "px" });
+  return a;
+}
+function ago(iso) {
+  const d = (Date.now() - new Date(iso)) / 1000;
+  if (d < 60) return "just now";
+  if (d < 3600) return Math.floor(d / 60) + "m ago";
+  if (d < 86400) return Math.floor(d / 3600) + "h ago";
+  const days = Math.floor(d / 86400);
+  return days === 1 ? "yesterday" : days + " days ago";
 }
 async function api(path, body) {
   const res = await fetch(path, body === undefined ? {} : {
@@ -264,6 +544,15 @@ async function shrinkImage(file) {
   const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.9));
   return new File([blob], "parchi.jpg", { type: "image/jpeg" });
 }
+let toastTimer;
+function toast(html) {
+  document.querySelector(".toast")?.remove();
+  const t = el("div", "toast");
+  t.innerHTML = html;
+  document.body.append(t);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.remove(), 2600);
+}
 
 // ---------------------------------------------------------------- audio
 function stopAudio() {
@@ -273,304 +562,552 @@ function stopAudio() {
 function playNext() {
   const clip = state.queue.shift();
   if (!clip) { state.player = null; return; }
-  const a = new Audio("data:audio/wav;base64," + clip);
+  const a = new Audio(clip.startsWith("/") ? clip : "data:audio/wav;base64," + clip);
   state.player = a;
   a.onended = playNext;
   a.play().catch(() => (state.player = null));
 }
-// Speak text in a language; returns the clips so they can be replayed.
-async function say(text, language, row) {
-  const { audio, ms } = await api("/api/speak", { text, language });
-  stopAudio();
-  state.queue.push(...audio);
-  playNext();
-  if (row) row.append(badge("🔊 Bulbul", ms));
-  return audio;
+function play(clips, append = false) {
+  if (!append) stopAudio();
+  state.queue.push(...clips);
+  if (!state.player) playNext();
 }
-function replayButton(getClips, label = "🔊 Play") {
-  const b = el("button", "icon-btn", label);
+async function speak(text, language) {
+  return api("/api/speak", { text, language });
+}
+function listenButton(getClips, label = "Listen") {
+  const b = el("button", "btn sm");
   b.type = "button";
+  b.innerHTML = icon("volume") + label;
   b.onclick = async () => {
-    const clips = await getClips();
-    if (!clips) return;
-    stopAudio();
-    state.queue.push(...clips);
-    playNext();
+    b.disabled = true;
+    try { play(await getClips()); } finally { b.disabled = false; }
   };
   return b;
 }
 
+// ---------------------------------------------------------------- charts
+function sparkline(values, color) {
+  const w = 84, h = 26, max = Math.max(...values, 1);
+  const pts = values.map((v, i) => [(i / (values.length - 1)) * (w - 4) + 2, h - 3 - (v / max) * (h - 6)]);
+  const line = pts.map((p) => p.join(",")).join(" ");
+  const area = `2,${h} ${line} ${w - 2},${h}`;
+  const id = "g" + Math.random().toString(36).slice(2, 7);
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    <defs><linearGradient id="${id}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".22"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+    <polygon points="${area}" fill="url(#${id})"/><polyline points="${line}" fill="none" stroke="${color}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${pts.at(-1)[0]}" cy="${pts.at(-1)[1]}" r="2.2" fill="${color}"/></svg>`;
+}
+
 // ---------------------------------------------------------------- rendering
-function entryRow(e, { undo = true } = {}) {
-  const row = el("div", `entry k-${e.kind}${e.undone ? " undone" : ""}`);
-  const grow = el("div", "grow");
-  grow.append(el("div", "kind", KIND[e.kind] || e.kind));
-  if (e.party) grow.append(el("div", "who", e.party));
-  if (e.items) grow.append(el("div", "items", e.items));
-  row.append(grow, el("div", "amt", rupees(e.amount)));
-  if (e.evidence) {
-    const isPhoto = /\.(png|jpe?g|webp)$/i.test(e.evidence);
-    const b = el("button", "icon-btn", isPhoto ? "🖼" : "▶");
-    b.type = "button";
-    b.title = isPhoto ? "See the original bill" : "Hear the original voice note";
-    b.onclick = () => {
-      if (isPhoto) window.open("/evidence/" + e.evidence, "_blank");
-      else { stopAudio(); state.player = new Audio("/evidence/" + e.evidence); state.player.play(); }
-    };
-    row.append(b);
-  }
-  if (undo) {
-    const u = el("button", "icon-btn", e.undone ? "↺" : "✕");
-    u.type = "button";
-    u.title = e.undone ? "Restore" : "Cancel this entry";
-    u.onclick = async () => render(await api(`/api/entries/${e.id}/toggle`, {}));
-    row.append(u);
-  }
+function entryRow(e, { compact = false } = {}) {
+  const row = el("div", "entry" + (e.undone ? " undone" : ""));
+  row.append(el("span", "tag t-" + e.kind, KIND[e.kind] || e.kind));
+  const main = el("div", "e-main");
+  main.append(el("div", "e-who", e.party || KIND[e.kind]));
+  if (e.items) main.append(el("div", "e-items", e.items));
+  row.append(main);
+  row.append(el("div", "e-amt num" + (e.kind === "credit" ? " amt-credit" : e.kind === "payment" ? " amt-payment" : ""),
+    (e.kind === "payment" ? "−" : "") + rupees(e.amount)));
+  row.append(entryActions(e, compact));
   return row;
 }
 
-function reminderCard(r) {
-  const card = el("div", "reminder");
-  card.append(el("div", "head", `📨 Reminder for ${r.name} · ${LANG_NAME[r.language] || r.language} · ${rupees(r.balance)}`));
-  card.append(el("p", null, r.text));
-  const row = el("div", "row");
-  row.style.display = "flex"; row.style.gap = "8px"; row.style.flexWrap = "wrap";
-  const wa = el("a", "wa", "Send on WhatsApp");
-  wa.href = r.whatsapp; wa.target = "_blank"; wa.rel = "noopener";
-  let clips = null;
-  row.append(wa, replayButton(async () => clips || (clips = (await api("/api/speak", { text: r.text, language: r.language })).audio), "🔊 Hear message"));
-  card.append(row);
-  return card;
+function entryActions(e) {
+  const box = el("div", "e-actions");
+  if (e.evidence) {
+    const isPhoto = /\.(png|jpe?g|webp)$/i.test(e.evidence);
+    const b = el("button", "btn ghost icon sm");
+    b.type = "button";
+    b.title = isPhoto ? "View original bill" : "Play original voice note";
+    b.innerHTML = icon(isPhoto ? "image" : "play");
+    b.onclick = () => (isPhoto ? window.open("/evidence/" + e.evidence, "_blank") : play(["/evidence/" + e.evidence]));
+    box.append(b);
+  }
+  const u = el("button", "btn ghost icon sm");
+  u.type = "button";
+  u.title = e.undone ? "Restore entry" : "Void entry";
+  u.innerHTML = icon(e.undone ? "undo" : "x");
+  u.onclick = async () => {
+    render(await api(`/api/entries/${e.id}/toggle`, {}));
+    toast(icon("check") + (e.undone ? "Entry restored" : "Entry voided"));
+  };
+  box.append(u);
+  return box;
 }
 
-function render(data) {
-  state.data = data;
-  $("shopName").textContent = data.shop + " · Bolo, khata likh jaayega";
-  $("tDue").textContent = rupees(data.outstanding);
-  $("tSale").textContent = rupees(data.today.sale || 0);
-  $("tGot").textContent = rupees(data.today.payment || 0);
+function renderKpis(d) {
+  const series = (k) => d.daily.map((x) => x[k] || 0);
+  const outstandingTrend = (() => {
+    // Running receivables over the week: start from today's figure and walk back.
+    let level = d.outstanding;
+    const out = [];
+    for (const day of [...d.daily].reverse()) { out.unshift(level); level -= (day.credit || 0) - (day.payment || 0); }
+    return out;
+  })();
+  const cards = [
+    ["Outstanding credit", d.outstanding, "wallet", "var(--credit)", "var(--credit-bg)", `${d.customers.filter((c) => c.balance > 0).length} customers owe`, outstandingTrend],
+    ["Sales today", d.today.sale || 0, "trend", "var(--sale)", "var(--sale-bg)", "Cash & UPI", series("sale")],
+    ["Collected today", d.today.payment || 0, "in", "var(--payment)", "var(--payment-bg)", "Credit repaid", series("payment")],
+    ["Purchases today", d.today.purchase || 0, "box", "var(--purchase)", "var(--purchase-bg)", "Stock bought", series("purchase")],
+  ];
+  $("kpis").innerHTML = cards.map(([label, value, ic, color, bg, note, s]) => `
+    <div class="kpi">
+      <div class="kpi-head"><span class="ic" style="background:${bg};color:${color}">${icon(ic)}</span>${label}</div>
+      <div class="kpi-value num">${rupees(value)}</div>
+      <div class="kpi-foot"><span class="kpi-note">${note}</span>${sparkline(s, getComputedStyle(document.documentElement).getPropertyValue(color.slice(4, -1)).trim() || "#4f46e5")}</div>
+    </div>`).join("");
+}
 
-  const cust = $("customers");
-  cust.innerHTML = "";
-  if (!data.customers.length) cust.append(el("div", "empty", "No customers yet. Say “Ramesh ko 500 udhaar diya” to add one."));
-  for (const c of data.customers) {
-    const row = el("div", "cust");
-    row.append(el("div", "avatar", c.name.slice(0, 1).toUpperCase()));
-    const grow = el("div", "grow");
-    grow.append(el("div", "name", c.name));
-    const sel = el("select");
-    sel.title = "Language for reminders";
+function renderLedger(d) {
+  const counts = { all: d.entries.length };
+  for (const e of d.entries) counts[e.kind] = (counts[e.kind] || 0) + 1;
+  const filters = [["all", "All"], ["credit", "Credit"], ["payment", "Payments"], ["sale", "Sales"], ["purchase", "Purchases"], ["expense", "Expenses"]];
+  $("ledgerFilter").innerHTML = "";
+  for (const [key, label] of filters) {
+    const b = el("button", state.filter === key ? "active" : "", `${label}${counts[key] ? " · " + counts[key] : ""}`);
+    b.type = "button";
+    b.onclick = () => { state.filter = key; renderLedger(state.data); };
+    $("ledgerFilter").append(b);
+  }
+  const rows = d.entries.filter((e) => state.filter === "all" || e.kind === state.filter);
+  $("ledgerSub").textContent = `${d.entries.filter((e) => !e.undone).length} entries · ${rupees(d.outstanding)} outstanding`;
+  const t = $("ledgerTable");
+  t.innerHTML = "<thead><tr><th>Type</th><th>Party</th><th>Details</th><th>Source</th><th class='r keep'>Amount</th><th class='keep'></th></tr></thead>";
+  const body = el("tbody");
+  if (!rows.length) body.innerHTML = `<tr><td colspan="6"><div class="empty"><div class="empty-title">No entries yet</div>Record one from the Assistant.</div></td></tr>`;
+  let lastDay = "";
+  for (const e of rows) {
+    const day = new Date(e.created_at).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" });
+    if (day !== lastDay) {
+      body.insertAdjacentHTML("beforeend", `<tr class="day-row"><td colspan="6">${day}</td></tr>`);
+      lastDay = day;
+    }
+    const tr = el("tr");
+    if (e.undone) tr.style.opacity = 0.45;
+    const tdType = el("td"); tdType.append(el("span", "tag t-" + e.kind, KIND[e.kind]));
+    const tdWho = el("td"); tdWho.append(el("div", "p-name", e.party || "—"));
+    tdWho.append(el("div", "p-sub", new Date(e.created_at).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" })));
+    const tdItems = el("td", "muted", e.items || "—");
+    const src = { voice: "Voice", text: "Typed", photo: "Bill photo", demo: "Imported" }[e.source] || e.source;
+    const tdSrc = el("td", "muted");
+    tdSrc.textContent = src + (e.language && e.source !== "demo" ? " · " + langName(e.language) : "");
+    const tdAmt = el("td", "r keep num" + (e.kind === "credit" ? " amt-credit" : e.kind === "payment" ? " amt-payment" : ""));
+    tdAmt.style.fontWeight = 600;
+    tdAmt.textContent = (e.kind === "payment" ? "−" : "") + rupees(e.amount);
+    if (e.undone) tdAmt.style.textDecoration = "line-through";
+    const tdAct = el("td", "keep"); tdAct.append(entryActions(e));
+    tr.append(tdType, tdWho, tdItems, tdSrc, tdAmt, tdAct);
+    body.append(tr);
+  }
+  t.append(body);
+}
+
+function renderCustomers(d) {
+  const owing = d.customers.filter((c) => c.balance > 0);
+  $("custSub").textContent = `${owing.length} of ${d.customers.length} customers owe ${rupees(d.outstanding)}`;
+  const max = Math.max(...d.customers.map((c) => c.balance), 1);
+  const t = $("custTable");
+  t.innerHTML = "<thead><tr><th>Customer</th><th class='r keep'>Balance</th><th>Reminder language</th><th>Last activity</th><th class='keep'></th></tr></thead>";
+  const body = el("tbody");
+  if (!d.customers.length) body.innerHTML = `<tr><td colspan="5"><div class="empty"><div class="empty-title">No customers yet</div>Say “Ramesh ko 500 udhaar diya” to add one.</div></td></tr>`;
+  for (const c of d.customers) {
+    const tr = el("tr");
+    const tdName = el("td");
+    const p = el("div", "person");
+    const info = el("div");
+    info.append(el("div", "p-name", c.name), el("div", "p-sub", c.phone ? "+91 " + c.phone : "No phone"));
+    p.append(avatar(c.name), info);
+    tdName.append(p);
+    const tdBal = el("td", "r keep num");
+    tdBal.innerHTML = `<div style="font-weight:600;color:${c.balance > 0 ? "var(--credit)" : "var(--payment)"}">${rupees(c.balance)}</div>
+      <div class="p-sub">${c.balance > 0 ? "due" : c.balance < 0 ? "advance" : "settled"}</div>`;
+    if (c.balance > 0) tdBal.insertAdjacentHTML("beforeend", `<div class="bar"><span style="width:${(c.balance / max) * 100}%"></span></div>`);
+    const tdLang = el("td");
+    const sel = el("select", "select");
     for (const l of state.languages) {
-      const o = el("option", null, "📨 " + (NATIVE[l.code] || l.name));
+      const o = el("option", null, `${(LANG[l.code] || [l.name, l.name])[1]} · ${l.name}`);
       o.value = l.code;
       sel.append(o);
     }
     sel.value = c.language;
-    sel.onchange = async () => render(await api(`/api/customers/${c.id}`, { language: sel.value }));
-    grow.append(sel);
-    const bal = el("div", "bal " + (c.balance > 0 ? "due" : "clear"), rupees(Math.abs(c.balance)));
-    bal.append(el("small", null, c.balance > 0 ? "baaki · due" : c.balance < 0 ? "advance" : "clear"));
-    row.append(grow, bal);
+    sel.onchange = async () => {
+      render(await api(`/api/customers/${c.id}`, { language: sel.value }));
+      toast(icon("check") + `${c.name}'s reminders will be in ${langName(sel.value)}`);
+    };
+    tdLang.append(sel);
+    const tdLast = el("td", "muted", c.last_at ? ago(c.last_at) : "—");
+    const tdAct = el("td", "keep r");
     if (c.balance > 0) {
-      const b = el("button", "icon-btn", "📨");
+      const b = el("button", "btn sm");
       b.type = "button";
-      b.title = "Send a payment reminder";
-      b.onclick = () => remind(c, b);
-      row.append(b);
+      b.innerHTML = icon("bell") + '<span class="hide-sm">Remind</span>';
+      b.onclick = () => openReminder(c);
+      tdAct.append(b);
     }
-    cust.append(row);
-    if (c._reminder) cust.append(reminderCard(c._reminder));
+    tr.append(tdName, tdBal, tdLang, tdLast, tdAct);
+    body.append(tr);
   }
+  t.append(body);
+}
 
-  const list = $("entries");
-  list.innerHTML = "";
-  if (!data.entries.length) list.append(el("div", "empty", "No entries yet."));
-  let lastDay = "";
-  for (const e of data.entries) {
-    const day = new Date(e.created_at).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
-    if (day !== lastDay) {
-      const h = el("div", "section-title", day);
-      h.style.margin = lastDay ? "14px 2px 2px" : "0 2px 2px";
-      list.append(h);
-      lastDay = day;
-    }
-    list.append(entryRow(e));
+function renderRail(d) {
+  const recv = $("railRecv");
+  recv.innerHTML = "";
+  const owing = d.customers.filter((c) => c.balance > 0).slice(0, 6);
+  if (!owing.length) recv.innerHTML = '<div class="muted" style="padding:8px 0">Nobody owes you anything.</div>';
+  for (const c of owing) {
+    const row = el("div", "recv");
+    const grow = el("div", "grow");
+    grow.append(el("div", "p-name", c.name), el("div", "p-sub", `${langName(c.language)} · ${c.last_at ? ago(c.last_at) : "new"}`));
+    const amt = el("div", "recv-amt num", rupees(c.balance));
+    const b = el("button", "btn ghost icon sm");
+    b.type = "button"; b.title = "Send reminder"; b.innerHTML = icon("bell");
+    b.onclick = () => openReminder(c);
+    row.append(avatar(c.name, 28), grow, amt, b);
+    recv.append(row);
+  }
+  const act = $("railActivity");
+  act.innerHTML = "";
+  const colors = { credit: "var(--credit)", payment: "var(--payment)", sale: "var(--sale)", purchase: "var(--purchase)", expense: "var(--expense)" };
+  for (const e of d.entries.filter((x) => !x.undone).slice(0, 7)) {
+    const row = el("div", "activity");
+    const dot = el("span", "dot"); dot.style.background = colors[e.kind];
+    const body = el("div");
+    const line = el("div");
+    line.append(el("b", null, e.party || KIND[e.kind]),
+      document.createTextNode(e.party ? ` · ${KIND[e.kind].toLowerCase()} · ` : " · "), el("span", "num", rupees(e.amount)));
+    body.append(line, el("div", "when", ago(e.created_at)));
+    row.append(dot, body);
+    act.append(row);
   }
 }
 
-async function remind(c, btn) {
-  btn.innerHTML = '<span class="spin"></span>';
+function render(d) {
+  state.data = d;
+  $("shopName").textContent = d.shop;
+  $("shopAvatar").textContent = initials(d.shop);
+  $("navLedger").textContent = d.entries.filter((e) => !e.undone).length || "";
+  $("navCustomers").textContent = d.customers.length || "";
+  renderKpis(d);
+  renderLedger(d);
+  renderCustomers(d);
+  renderRail(d);
+}
+
+// ---------------------------------------------------------------- reminders
+function reminderBlock(r) {
+  const box = el("div", "reminder");
+  box.innerHTML = `<div class="reminder-head">${icon("msg")}Payment reminder · ${r.name} · ${langName(r.language)} · ${rupees(r.balance)}</div>`;
+  box.append(el("div", "reminder-text", r.text));
+  const actions = el("div", "reminder-actions");
+  const wa = el("a", "btn wa sm");
+  wa.href = r.whatsapp; wa.target = "_blank"; wa.rel = "noopener";
+  wa.innerHTML = icon("msg") + "Send on WhatsApp";
+  let clips;
+  actions.append(wa, listenButton(async () => clips || (clips = (await speak(r.text, r.language)).audio), "Hear message"));
+  box.append(actions);
+  return box;
+}
+
+async function openReminder(c) {
+  const scrim = el("div", "scrim");
+  const sheet = el("div", "sheet");
+  sheet.innerHTML = `<div class="sheet-head"></div><div class="sheet-body"><div class="skeleton" style="width:90%"></div><div class="skeleton" style="width:75%"></div><div class="skeleton" style="width:60%"></div><div class="muted" style="margin-top:10px;font-size:12px">Writing in ${langName(c.language)} with Sarvam-105B…</div></div>`;
+  const head = sheet.querySelector(".sheet-head");
+  const info = el("div");
+  info.style.flex = 1;
+  info.append(el("div", "card-title", `Remind ${c.name}`), el("div", "card-sub", `${rupees(c.balance)} due · message in ${langName(c.language)}`));
+  const close = el("button", "btn ghost icon");
+  close.type = "button"; close.innerHTML = icon("x");
+  close.onclick = () => scrim.remove();
+  head.append(avatar(c.name, 36), info, close);
+  scrim.append(sheet);
+  scrim.onclick = (e) => e.target === scrim && scrim.remove();
+  document.body.append(scrim);
   try {
     const r = await api(`/api/remind/${c.id}`, {});
-    const found = state.data.customers.find((x) => x.id === c.id);
-    if (found) found._reminder = r;
-    render(state.data);
-    say(r.text, r.language);
+    const body = sheet.querySelector(".sheet-body");
+    body.innerHTML = "";
+    body.append(el("div", "reminder-text", r.text));
+    const foot = el("div", "sheet-foot");
+    let clips;
+    const wa = el("a", "btn wa");
+    wa.href = r.whatsapp; wa.target = "_blank"; wa.rel = "noopener";
+    wa.innerHTML = icon("msg") + "Send on WhatsApp";
+    foot.append(listenButton(async () => clips || (clips = (await speak(r.text, r.language)).audio), "Hear message"), wa);
+    sheet.append(foot);
+    clips = (await speak(r.text, r.language)).audio;
+    if (document.body.contains(scrim)) play(clips);
   } catch (err) {
-    btn.textContent = "📨";
-    alert(err.message);
+    sheet.querySelector(".sheet-body").innerHTML = "";
+    sheet.querySelector(".sheet-body").append(el("div", "err", err.message));
   }
 }
 
-// ---------------------------------------------------------------- commands
+// ---------------------------------------------------------------- assistant
+function traceHtml(ms, extra) {
+  const steps = [];
+  if (ms.stt != null) steps.push(["Saaras", ms.stt]);
+  if (ms.lid != null) steps.push(["Language ID", ms.lid]);
+  if (ms.llm != null) steps.push(["Sarvam-105B", ms.llm]);
+  if (extra) steps.push(extra);
+  return steps.map(([n, t]) => `<span class="step">${n} <b>${secs(t)}</b></span>`).join('<span class="arrow">→</span>');
+}
+
 async function runCommand(payload, typedText) {
-  $("emptyFeed").classList.add("hidden");
+  showView("assistant");
+  $("feedEmpty").classList.add("hidden");
   stopAudio();
-  const turn = el("div", "turn");
-  const said = el("div", "said");
-  const meta = el("div", "meta", payload.audio_b64 ? "🎙 Listening…" : "⌨️ Typed");
-  const text = el("div", null, typedText || "…");
-  said.append(meta, text);
-  const reply = el("div", "reply pending");
-  reply.innerHTML = '<span class="spin"></span>Samajh raha hoon…';
-  turn.append(said, reply);
+  const turn = el("article", "turn");
+  const q = el("div", "turn-q");
+  q.innerHTML = `<div class="who you">${icon(payload.audio_b64 ? "mic" : "keyboard")}</div>`;
+  const qBody = el("div");
+  qBody.style.flex = 1;
+  const meta = el("div", "q-meta");
+  meta.innerHTML = `<span>${payload.audio_b64 ? "Voice" : "Typed"}</span><span>·</span><span>just now</span>`;
+  const qText = el("div", "q-text", typedText || "Transcribing…");
+  qBody.append(meta, qText);
+  q.append(qBody);
+  const a = el("div", "turn-a");
+  a.innerHTML = `<div class="who ai">${icon("sparkles")}</div>`;
+  const aBody = el("div", "a-body");
+  aBody.innerHTML = '<div class="skeleton" style="width:70%"></div><div class="skeleton" style="width:45%"></div>';
+  a.append(aBody);
+  turn.append(q, a);
   $("feed").prepend(turn);
-  window.scrollTo({ top: 0, behavior: "smooth" });
   setBusy(true);
+  let done = false;
   try {
     const d = await api("/api/command", payload);
+    done = true;
     state.lastLanguage = d.language;
-    meta.textContent = `🗣 ${LANG_NAME[d.detected] || d.detected} detected`;
-    text.textContent = d.transcript;
-    reply.className = "reply";
-    reply.textContent = "";
-    reply.append(el("div", null, d.reply));
-    const savedIds = new Set(d.saved);
-    for (const e of d.state.entries.filter((x) => savedIds.has(x.id)).reverse()) reply.append(entryRow(e, { undo: true }));
-    if (d.reminder) reply.append(reminderCard(d.reminder));
-    const row = el("div", "row");
-    if (d.ms.stt != null) row.append(badge("👂 Saaras", d.ms.stt));
-    if (d.ms.lid != null) row.append(badge("🌐 Language ID", d.ms.lid));
-    row.append(badge("🧠 Sarvam-105B", d.ms.llm));
-    let clips = null;
-    row.prepend(replayButton(async () => clips || (clips = (await api("/api/speak", { text: d.reply, language: d.language })).audio)));
-    reply.append(row);
+    qText.textContent = d.transcript;
+    meta.insertAdjacentHTML("afterbegin", `<span class="lang">${icon("globe")}${langName(d.detected)} · auto-detected</span>`);
+    aBody.innerHTML = "";
+    aBody.append(el("div", "a-text", d.reply));
+    const saved = d.state.entries.filter((e) => d.saved.includes(e.id)).reverse();
+    if (saved.length) {
+      const list = el("div", "entries");
+      for (const e of saved) list.append(entryRow(e));
+      aBody.append(list);
+    }
+    if (d.reminder) aBody.append(reminderBlock(d.reminder));
+    const foot = el("div", "a-foot");
+    let clips;
+    foot.append(listenButton(async () => clips || (clips = (await speak(d.reply, d.language)).audio), "Replay"));
+    const trace = el("span", "trace");
+    trace.innerHTML = traceHtml(d.ms);
+    foot.append(trace);
+    aBody.append(foot);
     render(d.state);
-    clips = await say(d.reply, d.language, row);
-    if (d.reminder) {
-      const r = d.reminder;
-      state.queue.push(...(await api("/api/speak", { text: r.text, language: r.language })).audio);
-      if (!state.player) playNext();
-    }
+    if (saved.length) toast(icon("check") + `${saved.length} ${saved.length === 1 ? "entry" : "entries"} recorded`);
+    const voice = await speak(d.reply, d.language);
+    clips = voice.audio;
+    trace.innerHTML = traceHtml(d.ms, ["Bulbul", voice.ms]);
+    play(clips);
+    if (d.reminder) play((await speak(d.reminder.text, d.reminder.language)).audio, true);
   } catch (err) {
-    // If the command itself failed, replace the spinner; if only the voice failed, keep the reply.
-    if (reply.classList.contains("pending")) {
-      reply.className = "reply";
-      reply.textContent = "";
-    }
-    reply.append(el("div", "error", err.message));
+    if (!done) aBody.innerHTML = "";
+    aBody.append(el("div", "err", err.message));
   } finally {
     setBusy(false);
   }
 }
 
 function setBusy(busy) {
-  $("mic").classList.toggle("busy", busy);
-  $("hint").textContent = busy ? "Working… · लिख रहा हूँ" : "Tap to speak · बोलने के लिए दबाएँ";
+  $("mic").disabled = busy;
+  $("typed").disabled = busy;
+  $("typed").placeholder = busy ? "Working…" : "Record an entry or ask anything — “Ramesh ko 500 udhaar diya”";
+  updateSend();
+  if (!busy) $("typed").focus({ preventScroll: true });
 }
+function updateSend() { $("sendBtn").disabled = !$("typed").value.trim() || $("typed").disabled; }
 
-let recorder = null;
+// Recording with a live level meter.
+const rec = { recorder: null, stream: null, ctx: null, raf: 0, start: 0 };
+for (let i = 0; i < 40; i++) $("wave").append(el("span"));
 async function toggleMic() {
-  if (recorder) { recorder.stop(); return; }
-  if ($("mic").classList.contains("busy")) return;
-  let stream;
+  if (rec.recorder) { rec.recorder.stop(); return; }
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    rec.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   } catch {
-    $("hint").textContent = "Microphone blocked. Type below instead.";
+    toast("Microphone is blocked. You can type instead.");
     return;
   }
   stopAudio();
-  showTab("bolo");
+  showView("assistant");
   const chunks = [];
-  recorder = new MediaRecorder(stream);
-  recorder.ondataavailable = (e) => e.data.size && chunks.push(e.data);
-  recorder.onstop = async () => {
-    stream.getTracks().forEach((t) => t.stop());
-    $("mic").classList.remove("recording");
-    const mime = (recorder.mimeType || "audio/webm").split(";")[0];
-    recorder = null;
+  rec.recorder = new MediaRecorder(rec.stream);
+  rec.recorder.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+  rec.recorder.onstop = async () => {
+    cancelAnimationFrame(rec.raf);
+    rec.ctx?.close();
+    rec.stream.getTracks().forEach((t) => t.stop());
+    const mime = (rec.recorder.mimeType || "audio/webm").split(";")[0];
+    rec.recorder = null;
+    setRecording(false);
     const blob = new Blob(chunks, { type: mime });
-    if (blob.size < 1500) { setBusy(false); return; }
+    if (blob.size < 1500) return;
     runCommand({ audio_b64: await toBase64(blob), audio_mime: mime });
   };
-  recorder.start();
-  $("mic").classList.add("recording");
-  $("hint").textContent = "Listening… tap again when done · सुन रहा हूँ";
+  rec.recorder.start();
+  setRecording(true);
+  rec.ctx = new AudioContext();
+  const analyser = rec.ctx.createAnalyser();
+  analyser.fftSize = 256;
+  rec.ctx.createMediaStreamSource(rec.stream).connect(analyser);
+  const data = new Uint8Array(analyser.frequencyBinCount);
+  const bars = [...$("wave").children];
+  rec.start = performance.now();
+  const tick = () => {
+    analyser.getByteFrequencyData(data);
+    bars.forEach((b, i) => { b.style.height = Math.max(3, (data[(i * 3) % data.length] / 255) * 28) + "px"; });
+    const s = Math.floor((performance.now() - rec.start) / 1000);
+    $("recTime").textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+    rec.raf = requestAnimationFrame(tick);
+  };
+  tick();
+}
+function setRecording(on) {
+  $("mic").classList.toggle("recording", on);
+  $("mic").innerHTML = icon(on ? "stop" : "mic");
+  $("recbar").classList.toggle("hidden", !on);
+  $("typed").classList.toggle("hidden", on);
+  $("kbdHint").classList.toggle("hidden", on);
+  $("sendBtn").classList.toggle("hidden", on);
 }
 
-// ---------------------------------------------------------------- parchi
-async function scanParchi(file) {
-  const out = $("parchiResult");
-  out.innerHTML = "";
-  const card = el("div", "card");
-  card.innerHTML = '<span class="spin"></span>Reading the bill with Sarvam Vision…';
-  out.append(card);
+// ---------------------------------------------------------------- bills
+async function scanBill(file) {
+  const card = el("div", "card bill");
+  const imgBox = el("div", "bill-img");
+  const img = el("img");
+  imgBox.append(img);
+  const body = el("div", "bill-body");
+  body.innerHTML = `<div class="card-head"><span class="spin" style="color:var(--purchase)"></span><div><div class="card-title">Reading bill…</div><div class="card-sub">Sarvam Vision is extracting line items</div></div></div>
+    <div style="padding:16px"><div class="skeleton"></div><div class="skeleton" style="width:80%"></div><div class="skeleton" style="width:65%"></div><div class="skeleton" style="width:72%"></div></div>`;
+  card.append(imgBox, body);
+  $("bills").prepend(card);
   try {
-    const img = await shrinkImage(file);
-    const thumb = el("img", "thumb");
-    thumb.src = URL.createObjectURL(img);
-    const d = await api("/api/parchi", { image_b64: await toBase64(img), mime: img.type, language: state.lastLanguage });
-    card.innerHTML = "";
-    card.append(el("div", "section-title", `🧾 ${d.bill.supplier || "Supplier bill"}${d.bill.date ? " · " + d.bill.date : ""}`));
-    const table = el("table", "bill");
+    const small = await shrinkImage(file);
+    img.src = URL.createObjectURL(small);
+    const d = await api("/api/parchi", { image_b64: await toBase64(small), mime: small.type, language: state.lastLanguage });
+    body.innerHTML = "";
+    const head = el("div", "card-head");
+    head.innerHTML = `<span class="tag t-purchase">Purchase recorded</span>`;
+    const hInfo = el("div");
+    hInfo.style.flex = 1;
+    hInfo.append(el("div", "card-title", d.bill.supplier || "Supplier bill"), el("div", "card-sub", [d.bill.date, `${(d.bill.items || []).length} items`].filter(Boolean).join(" · ")));
+    head.prepend(hInfo);
+    body.append(head);
+    const t = el("table", "data");
+    t.innerHTML = "<thead><tr><th class='keep'>Item</th><th class='keep'>Qty</th><th class='r keep'>Amount</th></tr></thead>";
+    const tb = el("tbody");
     for (const i of d.bill.items || []) {
       const tr = el("tr");
-      tr.append(el("td", null, `${i.name}${i.qty ? " · " + i.qty : ""}`), el("td", null, rupees(i.amount || 0)));
-      table.append(tr);
+      tr.append(el("td", "keep", i.name), el("td", "muted keep", i.qty || "—"));
+      const amt = el("td", "r num keep", rupees(i.amount || 0));
+      tr.append(amt);
+      tb.append(tr);
     }
-    const tr = el("tr", "total");
-    tr.append(el("td", null, "Total"), el("td", null, rupees(d.bill.total)));
-    table.append(tr);
-    card.append(table, el("p", null, "✅ " + d.reply));
-    const row = el("div", "row");
-    row.style.display = "flex"; row.style.gap = "6px"; row.style.flexWrap = "wrap";
-    row.append(badge("👁 Sarvam Vision", d.ms.vision), badge("🧠 Sarvam-105B", d.ms.llm));
-    card.append(row, thumb);
+    const tot = el("tr", "bill-total");
+    tot.append(el("td", "keep", "Total"), el("td", "keep"), el("td", "r num keep", rupees(d.bill.total)));
+    tb.append(tot);
+    t.append(tb);
+    body.append(t);
+    const foot = el("div", "a-foot");
+    foot.style.padding = "0 16px 14px";
+    foot.append(el("div", "a-text", d.reply));
+    const trace = el("span", "trace");
+    trace.innerHTML = traceHtml({}, ["Sarvam Vision", d.ms.vision]) + '<span class="arrow">→</span>' + `<span class="step">Sarvam-105B <b>${secs(d.ms.llm)}</b></span>`;
+    foot.append(trace);
+    body.append(foot);
     render(d.state);
-    say(d.reply, d.language, row);
+    toast(icon("check") + `Purchase of ${rupees(d.bill.total)} recorded`);
+    play((await speak(d.reply, d.language)).audio);
   } catch (err) {
-    card.innerHTML = "";
-    card.append(el("div", "error", err.message));
+    body.innerHTML = "";
+    const e = el("div", "err", err.message);
+    e.style.padding = "16px";
+    body.append(e);
   }
 }
 
-// ---------------------------------------------------------------- tabs & init
-function showTab(name) {
-  document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === name));
-  document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === "panel-" + name));
-  $("dock").classList.toggle("hidden", name === "parchi");
+// ---------------------------------------------------------------- navigation & init
+function showView(name) {
+  state.view = name;
+  document.querySelectorAll("[data-view]").forEach((b) => b.classList.toggle("active", b.dataset.view === name));
+  document.querySelectorAll(".view").forEach((v) => v.classList.toggle("active", v.id === "view-" + name));
+  $("pageTitle").textContent = VIEWS[name][0];
+  $("pageSub").textContent = VIEWS[name][1];
+}
+
+async function loadDemo() {
+  if (state.data?.entries.length && !confirm("Replace the current ledger with the demo shop?")) return;
+  $("feed").innerHTML = "";
+  $("feedEmpty").classList.remove("hidden");
+  $("bills").innerHTML = "";
+  render(await api("/api/demo", {}));
+  toast(icon("check") + "Demo shop loaded: Sharma General Store");
 }
 
 async function init() {
+  const saved = (() => { try { return localStorage.getItem("bk-theme"); } catch { return null; } })();
+  if (saved) document.documentElement.dataset.theme = saved;
   state.languages = await api("/api/languages");
   render(await api("/api/state"));
-  document.querySelectorAll(".tab").forEach((t) => (t.onclick = () => showTab(t.dataset.tab)));
-  for (const ex of EXAMPLES) {
-    const b = el("button", "example", ex);
-    b.type = "button";
-    b.onclick = () => runCommand({ text: ex }, ex);
-    $("examples").append(b);
+
+  document.querySelectorAll("[data-view]").forEach((b) => (b.onclick = () => showView(b.dataset.view)));
+  document.querySelectorAll("[data-goto]").forEach((b) => (b.onclick = () => showView(b.dataset.goto)));
+  for (const s of SUGGESTIONS) {
+    const c = el("button", "chip");
+    c.type = "button";
+    c.innerHTML = icon("sparkles");
+    c.append(s);
+    c.onclick = () => runCommand({ text: s }, s);
+    $("suggest").append(c);
   }
   $("mic").onclick = toggleMic;
-  $("typebar").onsubmit = (e) => {
+  $("typed").oninput = updateSend;
+  $("composerForm").onsubmit = (e) => {
     e.preventDefault();
     const t = $("typed").value.trim();
     if (!t) return;
     $("typed").value = "";
+    updateSend();
     runCommand({ text: t }, t);
   };
-  $("demoBtn").onclick = async () => {
-    if (state.data.entries.length && !confirm("Replace the current khata with the demo shop?")) return;
-    $("feed").innerHTML = "";
-    $("emptyFeed").classList.remove("hidden");
-    render(await api("/api/demo", {}));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "/" && document.activeElement !== $("typed")) { e.preventDefault(); showView("assistant"); $("typed").focus(); }
+    if (e.key === "Escape") document.querySelector(".scrim")?.remove();
+  });
+  $("demoBtn").onclick = loadDemo;
+  $("demoBtnTop").onclick = loadDemo;
+  $("themeBtn").onclick = () => {
+    const dark = document.documentElement.dataset.theme
+      ? document.documentElement.dataset.theme === "dark"
+      : matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("bk-theme", document.documentElement.dataset.theme); } catch {}
+    render(state.data);
   };
-  $("parchiPick").onclick = () => $("parchiFile").click();
-  $("parchiFile").onchange = (e) => e.target.files[0] && scanParchi(e.target.files[0]);
-  $("parchiSample").onclick = async () => {
+  window.addEventListener("scroll", () => $("topbar").classList.toggle("scrolled", scrollY > 4));
+
+  $("billPick").onclick = () => $("billFile").click();
+  $("billFile").onchange = (e) => e.target.files[0] && scanBill(e.target.files[0]);
+  $("billSample").onclick = async () => {
     const blob = await fetch("/samples/parchi.png").then((r) => r.blob());
-    scanParchi(new File([blob], "parchi.png", { type: "image/png" }));
+    scanBill(new File([blob], "parchi.png", { type: "image/png" }));
+  };
+  const drop = $("drop");
+  drop.ondragover = (e) => { e.preventDefault(); drop.classList.add("over"); };
+  drop.ondragleave = () => drop.classList.remove("over");
+  drop.ondrop = (e) => {
+    e.preventDefault();
+    drop.classList.remove("over");
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith("image/")) scanBill(f);
   };
 }
 init();
