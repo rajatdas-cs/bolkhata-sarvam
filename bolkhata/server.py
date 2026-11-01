@@ -287,7 +287,17 @@ Kinds:
 - expense: a shop expense (rent, electricity, transport, salary, chai)
 Rules: amounts are plain rupee numbers ("dedh hazaar" = 1500, "dhai sau" = 250, "three forty" = 340). One sentence can contain several entries. Customer names always in English letters with no honorifics (रमेश जी -> Ramesh, லட்சுமி அக்கா -> Lakshmi, Sharma ji -> Sharma). Questions about balances, sales, who owes what -> "ask". Asking to remind someone to pay / send a reminder -> "remind". Cancel or undo the last entry ("galat ho gaya", "cancel karo") -> "undo". If an entry has no amount, use "other"."""
 
-REPLY_PROMPT = """You are BolKhata, a friendly munim (accountant) speaking to a shopkeeper. Say the facts below back to them in {language}, written in its native script, in 1-2 short sentences. Use exactly these names and rupee amounts; never do your own maths. Use the everyday shop word for credit in that language and script (उधार in Hindi, கடன் in Tamil, ধার in Bengali), never the English word. Plain text only, no markdown or emojis."""
+REPLY_PROMPT = """You are BolKhata, a friendly munim (accountant) speaking to a shopkeeper. Say the facts below back to them in {language}, written in its native script, in 1-2 short sentences. Use exactly these names and rupee amounts; never do your own maths. Every word must be {language}: no English words and no words from other Indian languages.{credit_hint} Plain text only, no markdown or emojis."""
+
+# The everyday word for "credit" per language, so replies don't fall back to English.
+CREDIT_WORDS = {"hi-IN": "उधार", "ta-IN": "கடன்", "bn-IN": "ধার", "mr-IN": "उधारी", "gu-IN": "ઉધાર",
+                "pa-IN": "ਉਧਾਰ", "te-IN": "అప్పు", "kn-IN": "ಸಾಲ", "ml-IN": "കടം", "od-IN": "ଉଧାର"}
+
+
+def reply_prompt(code: str) -> str:
+    word = CREDIT_WORDS.get(code)
+    hint = f" For credit, say {word}." if word else ""
+    return REPLY_PROMPT.format(language=LANGUAGES[code][0], credit_hint=hint)
 
 ASK_PROMPT = """You are BolKhata, a friendly munim (accountant) for {shop}. Answer the shopkeeper's question in {language}, written in its native script, in 1-3 short sentences, using ONLY the ledger data below. Quote rupee amounts exactly as given; do not add numbers yourself unless the question needs a simple sum. Plain text only, no markdown.
 
@@ -417,7 +427,7 @@ def command(req: CommandRequest):
                 facts.append(f"{name} now owes {rupees(max(due.get(cid, 0), 0))} in total.")
             if not result["saved"]:
                 facts = ["I could not find an amount or a name. Please say it again with the amount."]
-            reply = chat(REPLY_PROMPT.format(language=LANGUAGES[language][0]), " ".join(facts), 300)
+            reply = chat(reply_prompt(language), " ".join(facts), 300)
 
         elif intent == "ask":
             snap = snapshot(conn)
@@ -446,7 +456,7 @@ def command(req: CommandRequest):
                          f"{rupees(result['reminder']['balance'])}. Press the WhatsApp button to send the message.")
             else:
                 facts = f"I could not find a customer called {name or 'that'}."
-            reply = chat(REPLY_PROMPT.format(language=LANGUAGES[language][0]), facts, 300)
+            reply = chat(reply_prompt(language), facts, 300)
 
         elif intent == "undo":
             last = conn.execute("SELECT * FROM entries WHERE undone = 0 ORDER BY id DESC LIMIT 1").fetchone()
@@ -456,10 +466,10 @@ def command(req: CommandRequest):
                     f" for {last['party']}." if last["party"] else ".")
             else:
                 facts = "There is nothing to cancel."
-            reply = chat(REPLY_PROMPT.format(language=LANGUAGES[language][0]), facts, 300)
+            reply = chat(reply_prompt(language), facts, 300)
 
         else:
-            reply = chat(REPLY_PROMPT.format(language=LANGUAGES[language][0]),
+            reply = chat(reply_prompt(language),
                          "I did not understand. Ask them to say an entry like: Ramesh took 500 rupees of goods on credit.", 300)
 
         timings["total"] = sum(timings.values())
@@ -531,7 +541,7 @@ def parchi(req: ParchiRequest):
     with db() as conn:
         entry_id = add_entry(conn, "purchase", total, party=bill.get("supplier"), items=items, source="photo",
                              transcript=text, language=language, evidence=save_evidence(image, ext))
-        reply = chat(REPLY_PROMPT.format(language=LANGUAGES[language][0]),
+        reply = chat(reply_prompt(language),
                      f"Recorded a purchase of {rupees(total)}" + (f" from {bill['supplier']}" if bill.get("supplier") else "")
                      + f" with {len(bill.get('items') or [])} items.", 300)
         return {"bill": bill, "entry_id": entry_id, "reply": reply, "language": language,
