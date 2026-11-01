@@ -21,7 +21,9 @@ from sarvamai import SarvamAI
 from sarvamai.core.api_error import ApiError
 
 ROOT = Path(__file__).parent
-DATA = ROOT / "data"
+# Vercel's filesystem is read-only except /tmp (which resets on cold starts).
+ON_VERCEL = bool(os.environ.get("VERCEL"))
+DATA = Path("/tmp/bolkhata") if ON_VERCEL else ROOT / "data"
 EVIDENCE = DATA / "evidence"
 EVIDENCE.mkdir(parents=True, exist_ok=True)
 
@@ -595,3 +597,11 @@ def load_demo():
             add_entry(conn, kind, amount, customer=customer, party=party, items=items, source="demo",
                       created_at=when)
         return snapshot(conn)
+
+
+# On Vercel the ledger starts empty after every cold start, so open with the demo shop.
+if ON_VERCEL:
+    with db() as conn:
+        empty = conn.execute("SELECT COUNT(*) FROM customers").fetchone()[0] == 0
+    if empty:
+        load_demo()
