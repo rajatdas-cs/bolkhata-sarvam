@@ -385,6 +385,17 @@ def state():
         return snapshot(conn)
 
 
+@app.get("/api/health")
+def health():
+    """Which database is in use, and whether it answers (no secrets returned)."""
+    try:
+        with db() as conn:
+            entries = conn.execute("SELECT COUNT(*) AS n FROM entries").fetchone()["n"]
+        return {"db": "postgres" if DATABASE_URL else "sqlite", "ok": True, "entries": entries}
+    except Exception as exc:
+        return {"db": "postgres" if DATABASE_URL else "sqlite", "ok": False, "error": type(exc).__name__}
+
+
 @app.get("/api/languages")
 def languages():
     return [{"code": code, "name": name} for code, (name, _) in LANGUAGES.items()]
