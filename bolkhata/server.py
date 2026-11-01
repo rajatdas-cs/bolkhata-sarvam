@@ -142,9 +142,20 @@ def db():
         raw.close()
 
 
-with db() as conn:
-    conn.executescript(SCHEMA.replace("INTEGER PRIMARY KEY", "SERIAL PRIMARY KEY").replace("REAL", "DOUBLE PRECISION")
-                       if DATABASE_URL else SCHEMA)
+DB_ERROR = None
+try:
+    with db() as conn:
+        conn.executescript(SCHEMA.replace("INTEGER PRIMARY KEY", "SERIAL PRIMARY KEY").replace("REAL", "DOUBLE PRECISION")
+                           if DATABASE_URL else SCHEMA)
+except Exception as exc:
+    if not DATABASE_URL:
+        raise
+    # Keep the app up on SQLite rather than failing every request; /api/health reports why.
+    DB_ERROR = f"{type(exc).__name__}: " + re.sub(r"\S+://\S+|password=\S+", "[redacted]", str(exc)).splitlines()[0][:300]
+    print("Postgres unavailable, falling back to SQLite:", DB_ERROR)
+    DATABASE_URL = None
+    with db() as conn:
+        conn.executescript(SCHEMA)
 
 
 def now() -> str:
@@ -391,7 +402,8 @@ def health():
     try:
         with db() as conn:
             entries = conn.execute("SELECT COUNT(*) AS n FROM entries").fetchone()["n"]
-        return {"db": "postgres" if DATABASE_URL else "sqlite", "ok": True, "entries": entries}
+        return {"db": "postgres" if DATABASE_URL else "sqlite", "ok": True, "entries": entries,
+                "postgres_error": DB_ERROR}
     except Exception as exc:
         return {"db": "postgres" if DATABASE_URL else "sqlite", "ok": False, "error": type(exc).__name__}
 
