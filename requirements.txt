@@ -1,0 +1,4 @@
+sarvamai
+fastapi
+uvicorn
+httpx

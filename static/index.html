@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kagaz Saathi</title>
+<style>
+  :root {
+    --paper: #fbf6ec;
+    --card: #ffffff;
+    --ink: #2b2118;
+    --muted: #7a6a58;
+    --line: #eadfcc;
+    --accent: #c2410c;
+    --accent-soft: #fff1e6;
+    --good: #15803d;
+    --good-soft: #ecfdf3;
+    --bad: #b91c1c;
+    --bad-soft: #fef2f2;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 17px/1.55 system-ui, -apple-system, "Segoe UI", "Noto Sans", sans-serif;
+  }
+  main { max-width: 640px; margin: 0 auto; padding: 20px 16px 60px; }
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .logo {
+    width: 48px; height: 48px; border-radius: 14px; background: var(--accent);
+    display: grid; place-items: center; color: #fff; font-size: 26px; flex: none;
+  }
+  h1 { font-size: 24px; margin: 0; letter-spacing: -0.01em; }
+  .tagline { margin: 0; color: var(--muted); font-size: 15px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px; margin-bottom: 16px;
+  }
+  label.field { display: block; font-weight: 600; margin-bottom: 8px; }
+  select, input[type=text] {
+    width: 100%; font: inherit; padding: 12px 14px; border-radius: 12px;
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+  }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font: inherit; font-weight: 600; border: 0; border-radius: 14px; cursor: pointer;
+    padding: 14px 18px; background: var(--accent); color: #fff; width: 100%;
+  }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn.secondary { background: var(--accent-soft); color: var(--accent); }
+  .btn.small { width: auto; padding: 10px 14px; font-size: 15px; }
+  .row { display: flex; gap: 10px; margin-top: 12px; }
+  .row > * { flex: 1; }
+  #preview { display: none; margin-top: 14px; max-height: 220px; width: 100%; object-fit: contain;
+    border-radius: 12px; border: 1px solid var(--line); background: #f5efe3; }
+  #fileName { display: none; margin-top: 10px; color: var(--muted); font-size: 15px; }
+
+  .steps { list-style: none; padding: 0; margin: 0; }
+  .steps li { display: flex; align-items: center; gap: 10px; padding: 6px 0; color: var(--muted); }
+  .steps li.active { color: var(--ink); font-weight: 600; }
+  .steps li.done { color: var(--good); }
+  .dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid currentColor; flex: none;
+    display: grid; place-items: center; font-size: 12px; }
+  .steps li.active .dot { border-top-color: transparent; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .chip { display: inline-block; background: var(--accent-soft); color: var(--accent);
+    font-weight: 700; font-size: 14px; padding: 4px 12px; border-radius: 999px; }
+  .summary { font-size: 19px; margin: 12px 0 14px; }
+  .play { background: var(--ink); }
+  .points { margin: 16px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+  .points li { display: flex; justify-content: space-between; gap: 14px; padding: 10px 0;
+    border-bottom: 1px solid var(--line); }
+  .points .k { color: var(--muted); }
+  .points .v { font-weight: 700; text-align: right; }
+  .callout { border-radius: 14px; padding: 14px 16px; margin-top: 12px; }
+  .callout b { display: block; font-size: 14px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px; }
+  .callout.action { background: var(--good-soft); color: #14532d; }
+  .callout.warn { background: var(--bad-soft); color: #7f1d1d; }
+  .callout.date { background: var(--accent-soft); color: #7c2d12; }
+  details { margin-top: 14px; color: var(--muted); font-size: 15px; }
+  details pre { white-space: pre-wrap; font: 14px/1.5 ui-monospace, monospace; background: #f7f1e6;
+    padding: 12px; border-radius: 10px; color: var(--ink); max-height: 260px; overflow: auto; }
+
+  .chat { display: flex; flex-direction: column; gap: 10px; margin: 6px 0 14px; }
+  .bubble { max-width: 85%; padding: 10px 14px; border-radius: 16px; }
+  .bubble.user { align-self: flex-end; background: var(--accent-soft); border-bottom-right-radius: 4px; }
+  .bubble.bot { align-self: flex-start; background: #f3ede2; border-bottom-left-radius: 4px; }
+  .bubble.pending { color: var(--muted); font-style: italic; }
+  .mic {
+    width: 84px; height: 84px; border-radius: 50%; border: 0; cursor: pointer; flex: none;
+    background: var(--accent); color: #fff; font-size: 34px; display: grid; place-items: center;
+    margin: 4px auto 6px; box-shadow: 0 6px 18px rgba(194, 65, 12, 0.3);
+  }
+  .mic.recording { background: var(--bad); animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 14px rgba(185, 28, 28, 0.15); } }
+  .hint { text-align: center; color: var(--muted); font-size: 15px; margin: 0 0 12px; }
+  .ask-row { display: flex; gap: 8px; }
+  .ask-row input { flex: 1; }
+  .error { background: var(--bad-soft); color: var(--bad); border-radius: 12px; padding: 12px 14px; margin-top: 12px; display: none; }
+  .note { color: var(--muted); font-size: 13px; text-align: center; margin-top: 24px; }
+  .hidden { display: none; }
+  .samples-label { margin: 16px 0 8px; color: var(--muted); font-size: 15px; }
+  .samples { display: flex; flex-wrap: wrap; gap: 8px; }
+  .sample { font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; padding: 8px 14px;
+    border-radius: 999px; border: 1px solid var(--line); background: var(--accent-soft); color: var(--accent); }
+  .sample:disabled { opacity: 0.5; cursor: default; }
+  .steps em { font-style: normal; font-weight: 500; font-size: 13px; color: var(--muted); margin-left: 6px; }
+  .pipeline { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .badge { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px;
+    background: #f3ede2; color: var(--muted); }
+  .badge b { color: var(--ink); }
+  .bubble .badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .bubble .badge { background: rgba(255,255,255,0.6); }
+  .switching { opacity: 0.45; transition: opacity 0.2s; pointer-events: none; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="logo" aria-hidden="true">📄</div>
+    <div>
+      <h1>Kagaz Saathi</h1>
+      <p class="tagline">Your document, explained in your language · आपका कागज़, आपकी भाषा में</p>
+    </div>
+  </header>
+
+  <section class="card" id="uploadCard">
+    <label class="field" for="language">Explain in · किस भाषा में समझाएँ?</label>
+    <select id="language"></select>
+
+    <div class="row">
+      <button class="btn" id="pickBtn" type="button">📷 Photo / Upload</button>
+    </div>
+    <input id="fileInput" type="file" accept="image/*,application/pdf" capture="environment" hidden>
+    <img id="preview" alt="Selected document">
+    <div id="fileName"></div>
+
+    <div class="row">
+      <button class="btn" id="explainBtn" type="button" disabled>Explain ▶</button>
+    </div>
+    <p class="samples-label">No document handy? Try a sample:</p>
+    <div class="samples" id="samples"></div>
+    <div class="error" id="uploadError"></div>
+  </section>
+
+  <section class="card hidden" id="progressCard">
+    <ul class="steps" id="steps">
+      <li><span class="dot"></span><span>Reading your document <em>Sarvam Vision</em></span></li>
+      <li><span class="dot"></span><span>Understanding what it means <em>Sarvam-105B</em></span></li>
+    </ul>
+  </section>
+
+  <section class="card hidden" id="resultCard">
+    <span class="chip" id="docType"></span>
+    <p class="summary" id="summary"></p>
+    <button class="btn play" id="playBtn" type="button">🔊 Listen</button>
+    <div id="callouts"></div>
+    <ul class="points" id="points"></ul>
+    <div class="pipeline" id="pipeline"></div>
+    <details>
+      <summary>Text read from the document</summary>
+      <pre id="docText"></pre>
+    </details>
+  </section>
+
+  <section class="card hidden" id="askCard">
+    <label class="field">Ask anything about this document</label>
+    <div class="chat" id="chat"></div>
+    <button class="mic" id="micBtn" type="button" aria-label="Ask by voice">🎤</button>
+    <p class="hint" id="micHint">Tap and speak in any language · बोलकर पूछें</p>
+    <form class="ask-row" id="askForm">
+      <input type="text" id="askInput" placeholder="Or type your question…" autocomplete="off">
+      <button class="btn small" type="submit">Ask</button>
+    </form>
+  </section>
+
+  <p class="note">Kagaz Saathi helps you understand documents. For legal, medical or money decisions, confirm with the office that sent it.<br>Powered by Sarvam AI: Vision · Sarvam-105B · Saaras · Bulbul</p>
+</main>
+
+<script>
+const NATIVE = {
+  "hi-IN": "हिन्दी (Hindi)", "en-IN": "English", "bn-IN": "বাংলা (Bengali)", "ta-IN": "தமிழ் (Tamil)",
+  "te-IN": "తెలుగు (Telugu)", "mr-IN": "मराठी (Marathi)", "gu-IN": "ગુજરાતી (Gujarati)",
+  "kn-IN": "ಕನ್ನಡ (Kannada)", "ml-IN": "മലയാളം (Malayalam)", "pa-IN": "ਪੰਜਾਬੀ (Punjabi)", "od-IN": "ଓଡ଼ିଆ (Odia)",
+};
+const SAMPLES = [
+  { file: "electricity_bill.png", label: "⚡ Electricity bill" },
+  { file: "bank_notice_hi.png", label: "🏦 Bank notice (Hindi)" },
+  { file: "discharge_summary.png", label: "🏥 Hospital discharge" },
+];
+const $ = (id) => document.getElementById(id);
+const state = { file: null, docText: "", explanation: null, history: [], audio: [], player: null, timings: {} };
+
+async function api(path, body) {
+  const res = await fetch(path, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.detail || "Something went wrong. Please try again.");
+  return data;
+}
+
+function toBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result.split(",")[1]);
+    r.onerror = reject;
+    r.readAsDataURL(blob);
+  });
+}
+
+// Shrink big phone photos so uploads stay fast.
+async function prepareImage(file) {
+  if (!file.type.startsWith("image/")) return file;
+  const img = await createImageBitmap(file);
+  const scale = Math.min(1, 2000 / Math.max(img.width, img.height));
+  if (scale === 1 && file.size < 3e6) return file;
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(img.width * scale);
+  canvas.height = Math.round(img.height * scale);
+  canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+  const blob = await new Promise((r) => canvas.toBlob(r, "image/jpeg", 0.9));
+  return new File([blob], "document.jpg", { type: "image/jpeg" });
+}
+
+const secs = (ms) => (ms / 1000).toFixed(1) + "s";
+const badge = (name, ms) => `<span class="badge">${name} <b>${secs(ms)}</b></span>`;
+
+function setPlayLabel() {
+  const btn = $("playBtn");
+  btn.disabled = !state.player && !state.audio.length;
+  btn.textContent = state.player ? "⏸ Pause" : state.audio.length ? "🔊 Listen" : "⏳ Preparing voice…";
+}
+
+// Audio plays from a queue so clips can start before the rest have arrived.
+const queue = [];
+let voiceSeq = 0;
+
+function playNext() {
+  const clip = queue.shift();
+  if (!clip) { state.player = null; setPlayLabel(); return; }
+  const a = new Audio("data:audio/wav;base64," + clip);
+  state.player = a;
+  a.onended = playNext;
+  a.play().catch(() => { state.player = null; setPlayLabel(); });
+  setPlayLabel();
+}
+
+function enqueue(clips) {
+  queue.push(...clips);
+  if (!state.player) playNext();
+}
+
+function stopAudio() {
+  queue.length = 0;
+  if (state.player) { state.player.pause(); state.player = null; }
+  setPlayLabel();
+}
+
+function playClips(clips) {
+  stopAudio();
+  enqueue(clips);
+}
+
+// First sentence alone (so it's ready fast), then ~250-character chunks.
+function splitForSpeech(text) {
+  const sentences = text.split(/(?<=[.!?।])\s+/).filter(Boolean);
+  const chunks = [];
+  for (const s of sentences) {
+    const last = chunks.length > 1 ? chunks.length - 1 : -1;
+    if (last > 0 && chunks[last].length + s.length < 250) chunks[last] += " " + s;
+    else chunks.push(s);
+  }
+  return chunks.length ? chunks : [text];
+}
+
+// Synthesise all chunks in parallel and play them in order as they arrive.
+// Returns every clip; playback is skipped if newer audio started meanwhile.
+async function speakAndPlay(text, onFirstAudio) {
+  const seq = ++voiceSeq;
+  stopAudio();
+  const language = $("language").value;
+  const t0 = performance.now();
+  const requests = splitForSpeech(text).map((part) => api("/api/speak", { text: part, language }));
+  const clips = [];
+  for (const req of requests) {
+    const { audio } = await req;
+    if (!clips.length) onFirstAudio(Math.round(performance.now() - t0));
+    clips.push(...audio);
+    if (seq === voiceSeq) enqueue(audio);
+  }
+  return clips;
+}
+
+function setFile(file) {
+  state.file = file;
+  $("explainBtn").disabled = !file;
+  $("uploadError").style.display = "none";
+  const preview = $("preview");
+  if (file && file.type.startsWith("image/")) {
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = "block";
+    $("fileName").style.display = "none";
+  } else if (file) {
+    preview.style.display = "none";
+    $("fileName").textContent = "📎 " + file.name;
+    $("fileName").style.display = "block";
+  }
+}
+
+function setStep(n) {
+  [...$("steps").children].forEach((li, i) => {
+    li.className = i < n ? "done" : i === n ? "active" : "";
+    li.querySelector(".dot").textContent = i < n ? "✓" : "";
+  });
+}
+
+function renderPipeline() {
+  const t = state.timings;
+  $("pipeline").innerHTML = [
+    t.vision != null && badge("👁 Sarvam Vision", t.vision),
+    t.llm != null && badge("🧠 Sarvam-105B", t.llm),
+    t.tts != null && badge("🔊 Bulbul", t.tts),
+  ].filter(Boolean).join("");
+}
+
+function renderResult(ex) {
+  $("docType").textContent = ex.doc_type || "Document";
+  $("summary").textContent = ex.summary || "";
+  const callouts = $("callouts");
+  callouts.innerHTML = "";
+  const add = (cls, title, text) => {
+    if (!text) return;
+    const div = document.createElement("div");
+    div.className = "callout " + cls;
+    div.innerHTML = `<b>${title}</b>`;
+    div.append(document.createTextNode(text));
+    callouts.append(div);
+  };
+  add("action", "✅ What to do", ex.action_needed);
+  add("date", "📅 Important date", ex.deadline);
+  add("warn", "⚠️ Be careful", ex.warning);
+  const points = $("points");
+  points.innerHTML = "";
+  (ex.key_points || []).forEach((p) => {
+    const li = document.createElement("li");
+    li.innerHTML = '<span class="k"></span><span class="v"></span>';
+    li.querySelector(".k").textContent = p.label;
+    li.querySelector(".v").textContent = p.value;
+    points.append(li);
+  });
+  renderPipeline();
+}
+
+function addBubble(role, text, pending = false) {
+  const div = document.createElement("div");
+  div.className = `bubble ${role === "user" ? "user" : "bot"}${pending ? " pending" : ""}`;
+  div.textContent = text;
+  $("chat").append(div);
+  div.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  return div;
+}
+
+function setBusy(busy) {
+  $("explainBtn").disabled = busy || !state.file;
+  document.querySelectorAll(".sample").forEach((b) => (b.disabled = busy));
+}
+
+// Explain the already-read text in the chosen language, show it (onText), then fetch the voice.
+async function explainText(onText) {
+  const { explanation, ms } = await api("/api/explain", { doc_text: state.docText, language: $("language").value });
+  state.explanation = explanation;
+  state.timings.llm = ms;
+  delete state.timings.tts;
+  stopAudio();
+  state.audio = [];
+  renderResult(explanation);
+  setPlayLabel();
+  onText();
+  state.audio = await speakAndPlay(explanation.spoken || explanation.summary || "", (ms) => {
+    state.timings.tts = ms;
+    renderPipeline();
+  });
+  setPlayLabel();
+}
+
+async function explain() {
+  if (!state.file) return;
+  stopAudio();
+  setBusy(true);
+  $("resultCard").classList.add("hidden");
+  $("askCard").classList.add("hidden");
+  $("progressCard").classList.remove("hidden");
+  $("uploadError").style.display = "none";
+  setStep(0);
+  try {
+    const file = await prepareImage(state.file);
+    const read = await api("/api/read", {
+      file_b64: await toBase64(file), mime: file.type || "application/octet-stream", filename: file.name,
+    });
+    state.docText = read.doc_text;
+    state.timings = { vision: read.ms };
+    state.history = [];
+    $("chat").innerHTML = "";
+    $("docText").textContent = read.doc_text;
+    setStep(1);
+    await explainText(() => {
+      $("progressCard").classList.add("hidden");
+      $("resultCard").classList.remove("hidden");
+      $("askCard").classList.remove("hidden");
+      $("resultCard").scrollIntoView({ behavior: "smooth" });
+    });
+  } catch (err) {
+    $("progressCard").classList.add("hidden");
+    if ($("resultCard").classList.contains("hidden")) {
+      $("uploadError").textContent = err.message;
+      $("uploadError").style.display = "block";
+    } else {
+      $("playBtn").textContent = "Voice unavailable, tap to retry";
+      $("playBtn").disabled = false;
+    }
+  } finally {
+    setBusy(false);
+  }
+}
+
+// Switching language after a result re-explains the same text: no need to read it again.
+async function onLanguageChange() {
+  if (!state.docText || $("resultCard").classList.contains("hidden")) return;
+  stopAudio();
+  $("resultCard").classList.add("switching");
+  setBusy(true);
+  try {
+    await explainText(() => $("resultCard").classList.remove("switching"));
+  } catch (err) {
+    $("uploadError").textContent = err.message;
+    $("uploadError").style.display = "block";
+  } finally {
+    $("resultCard").classList.remove("switching");
+    setBusy(false);
+  }
+}
+
+async function ask(payload, userText) {
+  stopAudio();
+  const userBubble = userText ? addBubble("user", userText) : addBubble("user", "🎤 …", true);
+  const botBubble = addBubble("bot", "Thinking…", true);
+  try {
+    const data = await api("/api/ask", {
+      doc_text: state.docText, language: $("language").value, history: state.history, ...payload,
+    });
+    userBubble.textContent = data.question;
+    userBubble.classList.remove("pending");
+    botBubble.textContent = data.answer;
+    botBubble.classList.remove("pending");
+    state.history.push({ role: "user", content: data.question }, { role: "assistant", content: data.answer });
+    const badges = document.createElement("div");
+    badges.className = "badges";
+    badges.innerHTML = (data.ms.stt != null ? badge("👂 Saaras", data.ms.stt) : "") + badge("🧠 Sarvam-105B", data.ms.llm);
+    botBubble.append(badges);
+    await speakAndPlay(data.answer, (ms) => badges.insertAdjacentHTML("beforeend", badge("🔊 Bulbul", ms)));
+  } catch (err) {
+    if (!userText && userBubble.classList.contains("pending")) userBubble.remove();
+    if (botBubble.classList.contains("pending")) botBubble.textContent = err.message;
+  }
+}
+
+// Voice questions: tap to start, tap again to stop.
+let recorder = null;
+async function toggleMic() {
+  if (recorder) { recorder.stop(); return; }
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch {
+    $("micHint").textContent = "Microphone not available. Please type your question.";
+    return;
+  }
+  stopAudio();
+  const chunks = [];
+  recorder = new MediaRecorder(stream);
+  recorder.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+  recorder.onstop = async () => {
+    stream.getTracks().forEach((t) => t.stop());
+    $("micBtn").classList.remove("recording");
+    $("micHint").textContent = "Tap and speak in any language · बोलकर पूछें";
+    const mime = recorder.mimeType || "audio/webm";
+    recorder = null;
+    const blob = new Blob(chunks, { type: mime });
+    if (blob.size < 2000) return;
+    ask({ audio_b64: await toBase64(blob), audio_mime: mime.split(";")[0] });
+  };
+  recorder.start();
+  $("micBtn").classList.add("recording");
+  $("micHint").textContent = "Listening… tap again when done";
+}
+
+async function init() {
+  const langs = await fetch("/api/languages").then((r) => r.json());
+  $("language").innerHTML = langs
+    .map((l) => `<option value="${l.code}">${NATIVE[l.code] || l.name}</option>`).join("");
+  $("language").onchange = onLanguageChange;
+
+  $("samples").innerHTML = SAMPLES
+    .map((s, i) => `<button class="sample" type="button" data-i="${i}">${s.label}</button>`).join("");
+  $("samples").onclick = async (e) => {
+    const btn = e.target.closest(".sample");
+    if (!btn || btn.disabled) return;
+    const s = SAMPLES[btn.dataset.i];
+    const blob = await fetch("/samples/" + s.file).then((r) => r.blob());
+    setFile(new File([blob], s.file, { type: blob.type || "image/png" }));
+    explain();
+  };
+
+  $("pickBtn").onclick = () => $("fileInput").click();
+  $("fileInput").onchange = (e) => setFile(e.target.files[0] || null);
+  $("explainBtn").onclick = explain;
+  $("playBtn").onclick = async () => {
+    if (state.player) { stopAudio(); return; }
+    if (state.audio.length) { playClips(state.audio); return; }
+    if (!state.explanation) return;
+    try {
+      state.audio = await speakAndPlay(state.explanation.spoken || state.explanation.summary || "", (ms) => {
+        state.timings.tts = ms;
+        renderPipeline();
+      });
+      setPlayLabel();
+    } catch {
+      $("playBtn").textContent = "Voice unavailable, tap to retry";
+      $("playBtn").disabled = false;
+    }
+  };
+  $("micBtn").onclick = toggleMic;
+  $("askForm").onsubmit = (e) => {
+    e.preventDefault();
+    const q = $("askInput").value.trim();
+    if (!q) return;
+    $("askInput").value = "";
+    ask({ question: q }, q);
+  };
+}
+init();
+</script>
+</body>
+</html>
