@@ -2,6 +2,8 @@
 
 **Bolo, khata likh jaayega. Speak, and it's recorded.**
 
+**Live demo: https://bolkhata-hackathon.vercel.app** (works on phones; tap the mic and speak)
+
 A voice-first ledger (bahi-khata) for India's ~63M small shops. The shopkeeper never types: they say what happened in whatever language they think in, and BolKhata records it, reads it back, answers questions about the books and writes payment reminders in each customer's own language.
 
 ## The problem

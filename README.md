@@ -2,7 +2,7 @@
 
 | Project | What it is |
 |---|---|
-| **[BolKhata](bolkhata/)**: main submission | A voice-first ledger for small shops. Speak entries in any Indian language and get replies and customer reminders in their language. [Read more →](bolkhata/README.md) |
+| **[BolKhata](bolkhata/)**: main submission · **[Live demo](https://bolkhata-hackathon.vercel.app)** | A voice-first ledger for small shops. Speak entries in any Indian language and get replies and customer reminders in their language. [Read more →](bolkhata/README.md) |
 | **Kagaz Saathi**: earlier prototype | Photograph a document and hear it explained in your language (below). |
 
 Both use Sarvam AI: Saaras (speech-to-text and language detection), Sarvam-105B, Bulbul (text-to-speech) and Sarvam Vision.

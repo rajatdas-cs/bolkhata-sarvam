@@ -434,6 +434,9 @@ def command(req: CommandRequest):
             ledger = {
                 "today_totals": {k: rupees(v) for k, v in snap["today"].items()},
                 "total_outstanding_udhaar": rupees(snap["outstanding"]),
+                # Pre-computed so the model never has to compare amounts itself.
+                "customers_ranked_by_amount_owed_highest_first": [
+                    f"{c['name']}: {rupees(c['balance'])}" for c in snap["customers"] if c["balance"] > 0],
                 "customers": [{"name": c["name"], "owes": rupees(c["balance"])} for c in snap["customers"]],
                 "recent_entries": [
                     {"when": e["created_at"], "kind": e["kind"], "who": e["party"], "amount": rupees(e["amount"]),
