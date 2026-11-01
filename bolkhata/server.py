@@ -151,7 +151,8 @@ except Exception as exc:
     if not DATABASE_URL:
         raise
     # Keep the app up on SQLite rather than failing every request; /api/health reports why.
-    DB_ERROR = f"{type(exc).__name__}: " + re.sub(r"\S+://\S+|password=\S+", "[redacted]", str(exc)).splitlines()[0][:300]
+    # Only the exception type is exposed: driver messages can echo parts of the connection string.
+    DB_ERROR = type(exc).__name__
     print("Postgres unavailable, falling back to SQLite:", DB_ERROR)
     DATABASE_URL = None
     with db() as conn:
